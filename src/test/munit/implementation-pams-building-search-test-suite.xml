@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="implementation-pams-building-search-test-suite.xml" />
+	<munit:test name="implementation-pams-building-search-test-suite-implementation-pams-building-searchSub_FlowTest" doc:id="371957ee-b618-4f8e-a541-77a6adadfef4" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Event" doc:id="fe2167f5-8ee1-4e93-b089-e267d68e4bef" >
+				<munit:attributes value="#[readUrl('classpath://M-unitTestCases/setEventPamsBuildingSearch.json')]" />
+			</munit:set-event>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="2f58ae46-21fe-4508-98b2-204ca49f0639" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="DB: pamsBuildingSearchSelect query" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="bedb3ba2-170e-48ae-a7ad-8c023004ba76" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[readUrl('classpath://M-unitTestCases/mockWhenPamsBuildingSearchDB.json')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to implementation-pams-building-searchSub_Flow" doc:id="e6fcb354-c4fc-4716-b600-48ee9e01b19c" name="implementation-pams-building-searchSub_Flow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="7fda904e-c9b7-4543-a0b6-bbb0695093fa" expression="#[! isEmpty(payload)]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+<munit:test name="implementation-pams-building-search-test-suite-implementation-pams-building-searchSub_FlowTest_ChoiceDefault" doc:id="7bdfa3f7-b02d-4a06-87b1-8a8f3207de78" description="Test">
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to implementation-pams-building-searchSub_Flow" doc:id="8f405342-1b98-491e-97ce-c2aec2e08715" name="get:\getBuildingSearch:pams-master-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="ffa1d820-5e3a-425e-ab1f-1ea0d039b159" expression="#[! isEmpty(payload)]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

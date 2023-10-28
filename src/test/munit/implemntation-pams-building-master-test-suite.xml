@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="implemntation-pams-building-master-test-suite.xml" />
+	<munit:test name="implemntation-pams-building-master-test-suite-implemntation-pams-building-masterSub_FlowTest" doc:id="d95d5358-29e7-46f9-9831-c961b65c8c1c" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Event" doc:id="846a28f3-b1e5-43bc-bd90-e42db1c690b7" >
+				<munit:attributes value="#[readUrl('classpath://M-unitTestCases/setEventPamsBuildingMaster.json')]" />
+			</munit:set-event>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="723a24db-202b-4261-8067-b0494d645b2c" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="DB: buildingMasterSelect Query" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="8be73418-b304-464a-b8a2-d50d6f8869a2" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[readUrl('classpath://M-unitTestCases/mockWhenPamsBuildingMasterDB.json')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to implemntation-pams-building-masterSub_Flow" doc:id="d59359f4-bbcb-456b-866f-6066f5c29e16" name="implemntation-pams-building-masterSub_Flow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="4adbed9a-79e5-4271-a5cd-e5635780c469" expression="#[! isEmpty(payload)]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+<munit:test name="implemntation-pams-building-master-test-suite-implemntation-pams-building-masterSub_FlowTest_ChoiceDefault" doc:id="9aaf8ba4-4600-4969-bea8-404797a269dd" description="Test">
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to implemntation-pams-building-masterSub_Flow" doc:id="15243b3e-c157-4890-b344-c634577e4f06" name="get:\getbuildingMaster:pams-master-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="bc16081b-efed-43a1-9502-73a1a4894fef" expression="#[! isEmpty(payload)]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

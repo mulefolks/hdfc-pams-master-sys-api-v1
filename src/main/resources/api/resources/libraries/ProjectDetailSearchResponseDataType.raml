@@ -1,0 +1,251 @@
+#%RAML 1.0 Library
+types:
+  output:
+    type: object
+    properties:
+      correlationId:
+        description: Tracking parameter
+        type: string
+        required: false
+      timestamp:
+        description: timestamp
+        type: string | nil
+        required: false
+      appName:
+        type: string | nil
+        required: false
+      statusCode:
+        type: number | nil
+        required: false
+      projectDetails:
+        type: array
+        items:
+          properties:
+            CLPS_NO:
+              type: number | nil
+              required: false
+            UPDATED_ON:
+              type: string | nil
+              required: false
+            PMAY_FLAG:
+              type: string | nil
+              required: false
+            TECHNICAL_COORDINATOR:
+              type: string | nil
+              required: false
+            AGENCY_CODE:
+              type: number | nil
+              required: false
+            PROJECT_STATUS:
+              type: string | nil
+              required: false
+            PROJECT_STATUS_DESC:
+              type: string | nil
+              required: false
+            APPROVED_ON:
+              type: string | nil
+              required: false
+            NO_OF_BUILDING:
+              type: number | nil
+              required: false
+            PROJECT_NAME:
+              type: string | nil
+              required: false
+            TYPE:
+              type: string | nil
+              required: false
+            CENSUS_URB_LOC_2011:
+              type: string | nil
+              required: false
+            POCKETNO:
+              type: number | nil
+              required: false
+            APPROVED_BY_OTH_INST:
+              type: string | nil
+              required: false
+            NON_IND_FUNDING_BY_HDFC:
+              type: string | nil
+              required: false
+            EXEC_CD:
+              type: string | nil
+              required: false
+            APPROVED_BY_OTH_INSTUTION:
+              type: string | nil
+              required: false
+            STATE:
+              type: string | nil
+              required: false
+            SERVICECENTER:
+              type: string | nil
+              required: false
+            LANDMARK:
+              type: string | nil
+              required: false
+            PROPERTY_CLASSIFICATION:
+              type: string | nil
+              required: false
+            FIRST_APPROVAL_DT:
+              type: string | nil
+              required: false
+            NO_OF_DOC:
+              type: number | nil
+              required: false
+            DEVELOPMENTAUTHORITY:
+              type: string | nil
+              required: false
+            PINCODE:
+              type: string | nil
+              required: false
+            UNIT_LAUNCHED:
+              type: string | nil
+              required: false
+            BD_COORDINATOR:
+              type: string | nil
+              required: false
+            AREA_CODE:
+              type: number | nil
+              required: false
+            AQUIRING_MODE:
+              type: string | nil
+              required: false
+            SOURCE_TYPE:
+              type: string | nil
+              required: false
+            BUILDER_NO:
+              type: number | nil
+              required: false
+            PAC_COORDINATOR:
+              type: string | nil
+              required: false
+            APPROVED_BY:
+              type: string | nil
+              required: false
+            PROJECT_NO:
+              type: number | nil
+              required: false
+            TYPENO: 
+              type: number | nil
+              required: false
+            CREATED_ON:
+              type: string | nil
+              required: false
+            BLOCKNO:
+              type: number | nil
+              required: false
+            NO_OF_BUILDERS:
+              type: number | nil
+              required: false
+            DISTRICT:
+              type: string | nil
+              required: false
+            NAME_OF_THE_INSTITUTION:
+              type: string | nil
+              required: false
+            SUBLOCATION:
+              type: string | nil
+              required: false
+            PROJ_COST:
+              type: number | nil
+              required: false
+            PROJ_APPROVAL_DT:
+              type: string | nil
+              required: false
+            STATE_CODE:
+              type: string | nil
+              required: false
+            EXP_BUSINESS_UNIT:
+              type: string | nil
+              required: false
+            CLPS_COORDINATOR:
+              type: string | nil
+              required: false
+            TOT_APPR_UNIT:
+              type: string | nil
+              required: false
+            STREET3:
+              type: string | nil
+              required: false
+            MASTER_DOC_RECD_FLAG:
+              type: string | nil
+              required: false
+            CITY:
+              type: string | nil
+              required: false
+            ADDR_LINE:
+              type: string | nil
+              required: false
+            CREATED_SOURCE:
+              type: string | nil
+              required: false
+            OV_COORDINATOR:
+              type: string | nil
+              required: false
+            STREET1:
+              type: string | nil
+              required: false
+            STREET2:
+              type: string | nil
+              required: false
+            RECEIPT_DT:
+              type: string | nil
+              required: false
+            VILLAGE:
+              type: string | nil
+              required: false
+            SOURCE_NAME:
+              type: string | nil
+              required: false
+            NO_OF_PROPOSED_UNIT:
+              type: number | nil
+              required: false
+            SUB_STATUS_DESC:
+              type: string | nil
+              required: false
+            STAGE_OF_CONSTRUCTION:
+              type: string | nil
+              required: false
+            SUB_STATUS:
+              type: string | nil
+              required: false
+            NO_OF_UNITS:
+              type: number | nil
+              required: false
+            ORIGIN_PLACE:
+              type: string | nil
+              required: false
+            LEGAL_COORDINATOR:
+              type: string | nil
+              required: false
+            BUILDER_NAME:
+              type: string | nil
+              required: false
+            NHB_CLASSIFICATION_2011:
+              type: string | nil
+              required: false
+            STRESSED_PROJECT:
+              type: string | nil
+              required: false
+            PROJECT_SURVEY_NO:
+              type: number | nil
+              required: false
+            TALUKA:
+              type: string | nil
+              required: false
+            BRANCHOFPROJECT:
+              type: string | nil
+              required: false
+            LOCATION:
+              type: string | nil
+              required: false
+            ADDR_SECTOR_NO:
+              type: string | nil
+              required: false
+            LAUNCH_DATE:
+              type: string | nil
+              required: false
+            EXPECTED_COMPLETION_DATE:
+              type: string | nil
+              required: false
+            ADDR_SURVEY_NO:
+              type: string | nil
+              required: false

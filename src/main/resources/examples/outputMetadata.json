@@ -1,0 +1,22 @@
+[
+{
+  "version": "1.0",
+  "timestamp": "2022-07-13T09:37:39.482Z",
+  "project": {
+    "projectNo": "57684",
+    "projectName": "Gaurav",
+    "builderNo": "123456",
+    "builderName": "",
+    "projectStatus": "",
+    "reraNumber": "",
+    "address": [
+      {
+        "addr": "",
+        "city": "",
+        "stateCode": "",
+        "state": ""
+	   }
+	   ]
+	  }
+}
+]

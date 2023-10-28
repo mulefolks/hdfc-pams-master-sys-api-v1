@@ -1,0 +1,37 @@
+{
+  "headers": {
+    "correlationid": "asldfj-ljdsf43-jsdf334r",
+    "appname": "PAMS",
+    "client_secret": "C542Bb27a3a749BeBd2F460C6B7aF459",
+    "client_id": "ff85678ad41d4884ad4a2ae7d580eeb0",
+    "x-api-key": "sdfsaf",
+    "authorization": "Basic YWRqbGtmaGtzOmRzaGZranNma2hzZnNk",
+    "user-agent": "PostmanRuntime/7.30.0",
+    "accept": "*/*",
+    "cache-control": "no-cache",
+    "postman-token": "ab40b524-a89d-4776-b3c8-801fe3278043",
+    "host": "localhost:8098",
+    "accept-encoding": "gzip, deflate, br",
+    "connection": "keep-alive"
+  },
+  "clientCertificate": null,
+  "method": "GET",
+  "scheme": "https",
+  "queryParams": {
+    "propertyNumber": "P895920"
+  },
+  "requestUri": "/pams/v1/api/getBuildingSearch?propertyNumber=P895920",
+  "queryString": "propertyNumber=P895920",
+  "version": "HTTP/1.1",
+  "maskedRequestPath": "/getBuildingSearch",
+  "listenerPath": "/pams/v1/api/*",
+  "localAddress": "/127.0.0.1:8098",
+  "relativePath": "/api/getBuildingSearch",
+  "uriParams": {
+    
+  },
+  "rawRequestUri": "/pams/v1/api/getBuildingSearch?propertyNumber=P895920",
+  "rawRequestPath": "/pams/v1/api/getBuildingSearch",
+  "remoteAddress": "/127.0.0.1:53658",
+  "requestPath": "/pams/v1/api/getBuildingSearch"
+}

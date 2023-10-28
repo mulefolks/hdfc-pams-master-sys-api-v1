@@ -1,0 +1,37 @@
+{
+  "headers": {
+    "correlationid": "asldfj-ljdsf43-jsdf334r",
+    "appname": "PAMS",
+    "client_secret": "C542Bb27a3a749BeBd2F460C6B7aF459",
+    "client_id": "ff85678ad41d4884ad4a2ae7d580eeb0",
+    "x-api-key": "sdfsaf",
+    "authorization": "Basic YWRqbGtmaGtzOmRzaGZranNma2hzZnNk",
+    "user-agent": "PostmanRuntime/7.30.0",
+    "accept": "*/*",
+    "cache-control": "no-cache",
+    "postman-token": "05a94572-e18e-4a9b-80cf-004daf6802a6",
+    "host": "localhost:8098",
+    "accept-encoding": "gzip, deflate, br",
+    "connection": "keep-alive"
+  },
+  "clientCertificate": null,
+  "method": "GET",
+  "scheme": "https",
+  "queryParams": {
+    "projectNumber": "41943"
+  },
+  "requestUri": "/pams/v1/api/getbuildingMaster?projectNumber=41943",
+  "queryString": "projectNumber=41943",
+  "version": "HTTP/1.1",
+  "maskedRequestPath": "/getbuildingMaster",
+  "listenerPath": "/pams/v1/api/*",
+  "localAddress": "/127.0.0.1:8098",
+  "relativePath": "/api/getbuildingMaster",
+  "uriParams": {
+    
+  },
+  "rawRequestUri": "/pams/v1/api/getbuildingMaster?projectNumber=41943",
+  "rawRequestPath": "/pams/v1/api/getbuildingMaster",
+  "remoteAddress": "/127.0.0.1:53820",
+  "requestPath": "/pams/v1/api/getbuildingMaster"
+}

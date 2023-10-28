@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="implementation-pams-exposure-master-test-suite.xml" />
+	<munit:test name="implementation-pams-exposure-master-test-suite-impl-expo-proj-detailsSub_FlowTest" doc:id="241b0a91-5dea-493e-8ef0-a25098665eb9" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Event" doc:id="ce836600-e7d6-44f0-85be-43007b30e055" >
+				<munit:attributes value="#[readUrl('classpath://M-unitTestCases/setEventPamsgetExposure.json')]" />
+			</munit:set-event>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="959dfc7b-4bf5-463d-b5cf-04df2c1133d3" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="DB: pamsGetExpsoureSelectQuery" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="3ffc89d8-c0d6-4b3d-8d13-c46aa7f61257" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[readUrl('classpath://M-unitTestCases/mockWhenPamsExposureDetailsDB.json')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to impl-expo-proj-detailsSub_Flow" doc:id="c4c74d49-5eae-4e2a-8b6b-01eda7e8bd99" name="get:\getExposureMaster:pams-master-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="da7d479d-5acd-43d6-b961-c2dac8db1dcb" expression="#[! isEmpty(payload)]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+<munit:test name="implementation-pams-exposure-master-test-suite-impl-expo-proj-detailsSub_FlowTest_ChoiceDefault" doc:id="436983cc-b251-43c5-bb6b-535ed37fea2b" description="Test">
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to impl-expo-proj-detailsSub_Flow" doc:id="239448f1-3c23-4470-93b2-a6864551d9ec" name="impl-expo-proj-detailsSub_Flow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="50de87b3-64dc-4679-bffb-e322ecbd7f1d" expression="#[! isEmpty(payload)]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

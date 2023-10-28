@@ -1,0 +1,38 @@
+{
+ "headers": {
+    "correlationid": "asldfj-ljdsf43-jsdf334r",
+    "appname": "PAMS",
+    "client_secret": "C542Bb27a3a749BeBd2F460C6B7aF459",
+    "client_id": "ff85678ad41d4884ad4a2ae7d580eeb0",
+    "x-api-key": "sdfsaf",
+    "authorization": "Basic YWRqbGtmaGtzOmRzaGZranNma2hzZnNk",
+    "user-agent": "PostmanRuntime/7.30.0",
+    "accept": "*/*",
+    "cache-control": "no-cache",
+    "postman-token": "9a08f91d-13a7-461d-8407-b819d6730b2b",
+    "host": "localhost:8098",
+    "accept-encoding": "gzip, deflate, br",
+    "connection": "keep-alive"
+  },
+  "clientCertificate": null,
+  "method": "GET",
+  "scheme": "https",
+  "queryParams": {
+    "projectName": "41905",
+    "city": "1234"
+  },
+  "requestUri": "/pams/v1/api/getPamsProjectSearch?projectName=41905&city=1234",
+  "queryString": "projectName=41905",
+  "version": "HTTP/1.1",
+  "maskedRequestPath": "/getPamsProjectSearch",
+  "listenerPath": "/pams/v1/api/*",
+  "localAddress": "/127.0.0.1:8098",
+  "relativePath": "/api/getPamsProjectSearch",
+  "uriParams": {
+    
+  },
+  "rawRequestUri": "/pams/v1/api/getPamsProjectSearch?projectName=41905&city=1234",
+  "rawRequestPath": "/pams/v1/api/getPamsProjectSearch",
+  "remoteAddress": "/127.0.0.1:53059",
+  "requestPath": "/pams/v1/api/getPamsProjectSearch"
+}

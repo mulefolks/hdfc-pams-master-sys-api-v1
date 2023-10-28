@@ -1,0 +1,28 @@
+{
+    "timestamp": "2022-10-03T09:58:13.333Z",
+    "correlationId": "gfkhgfjgfdgds",
+    "appName": "CLOS",
+    "statusCode": 101,
+    "BuildingDetails": [
+        {
+            "floorNo": 3,
+            "buildingName": "TRIMURTI NAGARI WING A",
+            "buildingStatus": "Y",
+            "stageOfConstruction": null,
+            "propStatus": "COMPLETE ",
+            "totalUnit": 36,
+            "dateOfApr": "2016-06-11T00:00:00",
+            "buildingNo": null,
+            "builderNo": 447244,
+            "reraNo": null,
+            "propNo": "P895919",
+            "projectNo": 41943,
+            "floorDetail": "S",
+            "constructionStatus": 95,
+            "svDoneBy": "MMP",
+            "modeOfApr": "SV",
+            "appraiser": "KTB",
+            "wing": null
+        }
+      ]
+}

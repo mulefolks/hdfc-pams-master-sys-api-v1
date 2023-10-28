@@ -1,0 +1,91 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="outMetadata" format="json">
+      <types:shape format="weave" example="examples/outputMetadata.json"><![CDATA[%dw 2.0
+
+type outMetadata = Array<{|  version: String,   timestamp: String,   project: {|    projectNo: String,     projectName: String,     builderNo: String,     builderName: String,     projectStatus: String,     reraNumber: String,     address: Array<{|      addr: String,       city: String,       stateCode: String,       state: String    |}>
+  |}
+|}> {"example": "[{\\\"version\\\":\\\"1.0\\\",\\\"timestamp\\\":\\\"2022-07-13T09:37:39.482Z\\\",\\\"project\\\":{\\\"projectNo\\\":\\\"57684\\\",\\\"projectName\\\":\\\"Gaurav\\\",\\\"builderNo\\\":\\\"123456\\\",\\\"builderName\\\":\\\"\\\",\\\"projectStatus\\\":\\\"\\\",\\\"reraNumber\\\":\\\"\\\",\\\"address\\\":[{\\\"addr\\\":\\\"\\\",\\\"city\\\":\\\"\\\",\\\"stateCode\\\":\\\"\\\",\\\"state\\\":\\\"\\\"}]}}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="inputMetadata" format="json">
+      <types:shape format="weave" example="examples/inputMetadata.json"><![CDATA[%dw 2.0
+
+type inputMetadata = Array<{|  PINCODE: String,   PROJECT_NO: Number {"typeId": "int"},   CITY: String,   PROJECT_STATUS: String,   BUILDER_NAME: String,   STATE: String,   PROJECT_NAME: String,   ADDR: String,   BUILDER_NO: Number {"typeId": "int"},   STATE_CODE: String,   RERA_NO: String|}> {"example": "[{\\\"PINCODE\\\":\\\"412109\\\",\\\"PROJECT_NO\\\":41943,\\\"CITY\\\":\\\"PUNE\\\",\\\"PROJECT_STATUS\\\":\\\"Y\\\",\\\"BUILDER_NAME\\\":\\\"Nageshwar Properties\\\",\\\"STATE\\\":\\\"MAHARASHTRA\\\",\\\"PROJECT_NAME\\\":\\\"TRIMURTI NAGARI\\\",\\\"ADDR\\\":\\\"Survey No.:133DEHUGAON,, ,State : MAHARASHTRA,Pin Code:412109, Area Code :411001,Location :DEHU GAON\\\",\\\"BUILDER_NO\\\":447244,\\\"STATE_CODE\\\":\\\"MS\\\",\\\"RERA_NO\\\":\\\"P51600003905, P51700000419\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="buildingMasterInputMetadata" format="json">
+      <types:shape format="weave" example="examples/buildingMasterInputMetadata.json"><![CDATA[%dw 2.0
+
+type buildingMasterInputMetadata = Array<{|  FLOOR_NO: Number {"typeId": "int"},   BUILDING_NAME: String,   BUILDING_STATUS: String,   STAGE_OF_CONST: String,   PROP_STAT: String,   TOTAL_UNIT: Number {"typeId": "int"},   DATE_OF_APR: String,   BUILDING_NO: Null,   BUILDER_NO: Number {"typeId": "int"},   RERA_NO: String,   PROP_NO: String,   PROJECT_NO: Number {"typeId": "int"},   FLOOR_DET: String,   CONS_STATUS: Number {"typeId": "int"},   SV_DONE_BY: String,   MODE_OF_APR: String,   APPRAISER: String,   WING: Null|}> {"example": "[{\\\"FLOOR_NO\\\":41,\\\"BUILDING_NAME\\\":\\\"RUNWAL GREENS-T8-H-PINEWOOD\\\",\\\"BUILDING_STATUS\\\":\\\"Y\\\",\\\"STAGE_OF_CONST\\\":\\\"R\\\",\\\"PROP_STAT\\\":\\\"READY 655612556-CHECK FR\\\",\\\"TOTAL_UNIT\\\":140,\\\"DATE_OF_APR\\\":\\\"2021-03-20T00:00:00\\\",\\\"BUILDING_NO\\\":null,\\\"BUILDER_NO\\\":423704,\\\"RERA_NO\\\":\\\"P51800000271\\\",\\\"PROP_NO\\\":\\\"P825051\\\",\\\"PROJECT_NO\\\":13389,\\\"FLOOR_DET\\\":\\\"SB\\\",\\\"CONS_STATUS\\\":100,\\\"SV_DONE_BY\\\":\\\"CRV\\\",\\\"MODE_OF_APR\\\":\\\"SV\\\",\\\"APPRAISER\\\":\\\"JL1\\\",\\\"WING\\\":null},{\\\"FLOOR_NO\\\":38,\\\"BUILDING_NAME\\\":\\\"RUNWAL GREENS-T-4 - D-CEDAR-WING D\\\",\\\"BUILDING_STATUS\\\":\\\"Y\\\",\\\"STAGE_OF_CONST\\\":\\\"R\\\",\\\"PROP_STAT\\\":\\\"READYR 663508818\\\",\\\"TOTAL_UNIT\\\":216,\\\"DATE_OF_APR\\\":\\\"2021-07-29T00:00:00\\\",\\\"BUILDING_NO\\\":null,\\\"BUILDER_NO\\\":423704,\\\"RERA_NO\\\":null,\\\"PROP_NO\\\":\\\"P825052\\\",\\\"PROJECT_NO\\\":13389,\\\"FLOOR_DET\\\":\\\"G\\\",\\\"CONS_STATUS\\\":100,\\\"SV_DONE_BY\\\":\\\"JBACS\\\",\\\"MODE_OF_APR\\\":\\\"SV\\\",\\\"APPRAISER\\\":\\\"KIME\\\",\\\"WING\\\":null},{\\\"FLOOR_NO\\\":36,\\\"BUILDING_NAME\\\":\\\"RUNWAL GREENS- T-6 - F-EBONY\\\",\\\"BUILDING_STATUS\\\":\\\"Y\\\",\\\"STAGE_OF_CONST\\\":\\\"R\\\",\\\"PROP_STAT\\\":\\\"READY - B+4P+S+36 FLOORS F\\/654683995 - CHECK FR\\\",\\\"TOTAL_UNIT\\\":210,\\\"DATE_OF_APR\\\":\\\"2020-10-12T00:00:00\\\",\\\"BUILDING_NO\\\":null,\\\"BUILDER_NO\\\":423704,\\\"RERA_NO\\\":\\\"P51800000271\\\",\\\"PROP_NO\\\":\\\"P825053\\\",\\\"PROJECT_NO\\\":13389,\\\"FLOOR_DET\\\":\\\"G\\\",\\\"CONS_STATUS\\\":100,\\\"SV_DONE_BY\\\":\\\"PWN\\\",\\\"MODE_OF_APR\\\":\\\"SV\\\",\\\"APPRAISER\\\":\\\"RNV\\\",\\\"WING\\\":null}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="buidingMasterOutputMetadata" format="json">
+      <types:shape format="weave" example="examples/buildingMasterInputMetadata-1.json"><![CDATA[%dw 2.0
+
+type buidingMasterOutputMetadata = Array<{|  FLOOR_NO: Number {"typeId": "int"},   BUILDING_NAME: String,   BUILDING_STATUS: String,   STAGE_OF_CONST: String,   PROP_STAT: String,   TOTAL_UNIT: Number {"typeId": "int"},   DATE_OF_APR: String,   BUILDING_NO: Null,   BUILDER_NO: Number {"typeId": "int"},   RERA_NO: String,   PROP_NO: String,   PROJECT_NO: Number {"typeId": "int"},   FLOOR_DET: String,   CONS_STATUS: Number {"typeId": "int"},   SV_DONE_BY: String,   MODE_OF_APR: String,   APPRAISER: String,   WING: Null|}> {"example": "[{\\\"FLOOR_NO\\\":41,\\\"BUILDING_NAME\\\":\\\"RUNWAL GREENS-T8-H-PINEWOOD\\\",\\\"BUILDING_STATUS\\\":\\\"Y\\\",\\\"STAGE_OF_CONST\\\":\\\"R\\\",\\\"PROP_STAT\\\":\\\"READY 655612556-CHECK FR\\\",\\\"TOTAL_UNIT\\\":140,\\\"DATE_OF_APR\\\":\\\"2021-03-20T00:00:00\\\",\\\"BUILDING_NO\\\":null,\\\"BUILDER_NO\\\":423704,\\\"RERA_NO\\\":\\\"P51800000271\\\",\\\"PROP_NO\\\":\\\"P825051\\\",\\\"PROJECT_NO\\\":13389,\\\"FLOOR_DET\\\":\\\"SB\\\",\\\"CONS_STATUS\\\":100,\\\"SV_DONE_BY\\\":\\\"CRV\\\",\\\"MODE_OF_APR\\\":\\\"SV\\\",\\\"APPRAISER\\\":\\\"JL1\\\",\\\"WING\\\":null},{\\\"FLOOR_NO\\\":38,\\\"BUILDING_NAME\\\":\\\"RUNWAL GREENS-T-4 - D-CEDAR-WING D\\\",\\\"BUILDING_STATUS\\\":\\\"Y\\\",\\\"STAGE_OF_CONST\\\":\\\"R\\\",\\\"PROP_STAT\\\":\\\"READYR 663508818\\\",\\\"TOTAL_UNIT\\\":216,\\\"DATE_OF_APR\\\":\\\"2021-07-29T00:00:00\\\",\\\"BUILDING_NO\\\":null,\\\"BUILDER_NO\\\":423704,\\\"RERA_NO\\\":null,\\\"PROP_NO\\\":\\\"P825052\\\",\\\"PROJECT_NO\\\":13389,\\\"FLOOR_DET\\\":\\\"G\\\",\\\"CONS_STATUS\\\":100,\\\"SV_DONE_BY\\\":\\\"JBACS\\\",\\\"MODE_OF_APR\\\":\\\"SV\\\",\\\"APPRAISER\\\":\\\"KIME\\\",\\\"WING\\\":null},{\\\"FLOOR_NO\\\":36,\\\"BUILDING_NAME\\\":\\\"RUNWAL GREENS- T-6 - F-EBONY\\\",\\\"BUILDING_STATUS\\\":\\\"Y\\\",\\\"STAGE_OF_CONST\\\":\\\"R\\\",\\\"PROP_STAT\\\":\\\"READY - B+4P+S+36 FLOORS F\\/654683995 - CHECK FR\\\",\\\"TOTAL_UNIT\\\":210,\\\"DATE_OF_APR\\\":\\\"2020-10-12T00:00:00\\\",\\\"BUILDING_NO\\\":null,\\\"BUILDER_NO\\\":423704,\\\"RERA_NO\\\":\\\"P51800000271\\\",\\\"PROP_NO\\\":\\\"P825053\\\",\\\"PROJECT_NO\\\":13389,\\\"FLOOR_DET\\\":\\\"G\\\",\\\"CONS_STATUS\\\":100,\\\"SV_DONE_BY\\\":\\\"PWN\\\",\\\"MODE_OF_APR\\\":\\\"SV\\\",\\\"APPRAISER\\\":\\\"RNV\\\",\\\"WING\\\":null}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="buildingSearchInputMetadata" format="json">
+      <types:shape format="weave" example="examples/buildingSearchInputMetadata.json"><![CDATA[%dw 2.0
+
+type buildingSearchInputMetadata = Array<{|  ADDR_BLOCK: Null,   ADDR_TYPE: Null,   ADDR_TOWER: Null,   MAX_TOTAL_COST: Null,   MAX_AGR_VALUE: Null,   COMMENCEMENT_DATE: Null,   PROP_TYPE: String,   CENSUS_URB_LOC_2011: String,   PHASE_NO: Number {"typeId": "int"},   UNITS_PER_FLOOR: Null,   FLOOR_DET: String,   ADDR_POCKET: Null,   DEV_AUTH_NAME: Null,   STATE: String,   LANDMARK: String,   PAYMENT_PLAN: Null,   ADDR_PLOT: Null,   ADDR_LINE1: String,   AREA_CODE: Number {"typeId": "int"},   PROP_STAT: String,   BUILDING_NO: Null,   BUILDER_NO: Number {"typeId": "int"},   ADDR_PHASE: Null,   ADDR_SECTOR: Null,   PROJECT_NO: Number {"typeId": "int"},   PLOT_AREA: Null,   ADDR_LINE4: String,   ADDR_LINE5: Null,   SDF_FLAG: Null,   ADDR_LINE2: String,   ADDR_LINE3: String,   APPR_STATUS: String,   PLAN_AUTH_CODE: String,   FLOOR_NO: Number {"typeId": "int"},   ADDR_SURVEY: Null,   CITY: String,   ADDR_TENAMENT: Null,   ADDR_WARD: Null,   PIN_CODE: Number {"typeId": "int"},   MAX_EXPOSURE: Null,   ADDR_WING: Null,   STREET: Null,   APR_REMARK: Null,   TA_REQUIRED: String,   LEGAL_STATUS: String,   ADDR_UNIT: Null,   SDF_REMARK: Null,   ADDR_TO_BE_ALLOTED: Null,   STAGE_OF_CONSTRUCTION: Null,   CLSS_ELIGIBLE_PROP_FLAG: Null,   TOTAL_UNIT: Number {"typeId": "int"},   NHB_CLASSIFICATION_2011: String,   COMPLETION_MONTH: Null,   PROP_NAME: String,   TECH_STATUS: String,   BRANCH_NO: Number {"typeId": "int"},   LOCATION: String,   PROP_CATEGORY: String,   REMARKS: String|}> {"example": "[{\\\"ADDR_BLOCK\\\":null,\\\"ADDR_TYPE\\\":null,\\\"ADDR_TOWER\\\":null,\\\"MAX_TOTAL_COST\\\":null,\\\"MAX_AGR_VALUE\\\":null,\\\"COMMENCEMENT_DATE\\\":null,\\\"PROP_TYPE\\\":\\\"F\\\",\\\"CENSUS_URB_LOC_2011\\\":\\\"MUMBAI SUBURBAN\\\",\\\"PHASE_NO\\\":13469,\\\"UNITS_PER_FLOOR\\\":null,\\\"FLOOR_DET\\\":\\\"G\\\",\\\"ADDR_POCKET\\\":null,\\\"DEV_AUTH_NAME\\\":null,\\\"STATE\\\":\\\"MS\\\",\\\"LANDMARK\\\":\\\"NR WOCKHARDT [FORTIS] HSPTL\\\",\\\"PAYMENT_PLAN\\\":null,\\\"ADDR_PLOT\\\":null,\\\"ADDR_LINE1\\\":\\\"S NO NEW CTS 681A\\/7-9,NEW CTS\\\",\\\"AREA_CODE\\\":400119,\\\"PROP_STAT\\\":\\\"C\\\",\\\"BUILDING_NO\\\":null,\\\"BUILDER_NO\\\":423704,\\\"ADDR_PHASE\\\":null,\\\"ADDR_SECTOR\\\":null,\\\"PROJECT_NO\\\":13389,\\\"PLOT_AREA\\\":null,\\\"ADDR_LINE4\\\":\\\"MUMBAI\\\",\\\"ADDR_LINE5\\\":null,\\\"SDF_FLAG\\\":null,\\\"ADDR_LINE2\\\":\\\"681A\\/7-9,GOREGAON MUKUNDLINK\\\",\\\"ADDR_LINE3\\\":\\\"RD,VILLGWE NAHUR,MULUND [W]\\\",\\\"APPR_STATUS\\\":\\\"Y\\\",\\\"PLAN_AUTH_CODE\\\":\\\"MCORP\\\",\\\"FLOOR_NO\\\":36,\\\"ADDR_SURVEY\\\":null,\\\"CITY\\\":\\\"MUMBAI\\\",\\\"ADDR_TENAMENT\\\":null,\\\"ADDR_WARD\\\":null,\\\"PIN_CODE\\\":400078,\\\"MAX_EXPOSURE\\\":null,\\\"ADDR_WING\\\":null,\\\"STREET\\\":null,\\\"APR_REMARK\\\":null,\\\"TA_REQUIRED\\\":\\\"Y\\\",\\\"LEGAL_STATUS\\\":\\\"P\\\",\\\"ADDR_UNIT\\\":null,\\\"SDF_REMARK\\\":null,\\\"ADDR_TO_BE_ALLOTED\\\":null,\\\"STAGE_OF_CONSTRUCTION\\\":null,\\\"CLSS_ELIGIBLE_PROP_FLAG\\\":null,\\\"TOTAL_UNIT\\\":216,\\\"NHB_CLASSIFICATION_2011\\\":\\\"URB\\\",\\\"COMPLETION_MONTH\\\":null,\\\"PROP_NAME\\\":\\\"RUNWAL GREENS-T-3 - C- ROSEWOOD\\\",\\\"TECH_STATUS\\\":\\\"Y\\\",\\\"BRANCH_NO\\\":201,\\\"LOCATION\\\":\\\"BHANDUP_WEST\\\",\\\"PROP_CATEGORY\\\":\\\"B\\\",\\\"REMARKS\\\":\\\"5% STRUCTURED DISBURSEMENT SCHEME (5:5:70:15:5) APPROVED. CONTACT NEHA UCHIL AT MULUND OFFICE. CC-22 FLRS PLAN=2B+S+3P+1ST TO 36 RESIDENTIAL FLOORS DTD06 APR 2015 SENT TO MFL 9326  &  29 OCT 2014 SENT TO MFL 9326CC UPTO 15TH TOP  WR PLANS DT 16.5.2014     OK TC 24.5.10  - 8 TOWERS  [PROP] 15 FLRS   T= 1600    RATE 6800-->\$APR_REMARK=REFER DISB PROCESS NOTE 30.9.11 UPLOADED. WK NOT STARTED-->\$WARNING_REMARK=SDS,PEMI SUBVENTION FROM 1ST  JANUARY 2015 TO 31ST DECEMBER  2016 CONTACT NEHA UCHIL FOR DETAILS CF FROM HDFC LTD - NOC MUST. DISB PROCESS NOTE 30.9.11 - UPLOADED-->SDS,PEMI SUBVENTION FROM 1ST  JANUARY 2015 TO 31ST DECEMBER  2016 CONTACT NEHA UCHIL FOR DETAILS \$\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+    <types:type name="buildingSearchOutputMetadata" format="json">
+      <types:shape format="weave" example="examples/buildingSearchOutputMetadata-1.json"><![CDATA[%dw 2.0
+
+type buildingSearchOutputMetadata = Array<{|  builderNumber: Number {"typeId": "int"},   projectNumber: Number {"typeId": "int"},   buildingNumber: Null,   aprRemark: Null,   maxTotalCost: Null,   maxAvgValue: Null,   commencementDate: Null,   propType: String,   census_URB_Loc2011: String,   phaseNumber: Number {"typeId": "int"},   unitsPerFloor: Null,   floorDetails: String,   devAuthName: Null,   paymentPlan: Null,   propStatus: String,   plotArea: Null,   sdfFlag: Null,   apprStatus: String,   planAuthCode: String,   floorNo: Number {"typeId": "int"},   maxExposure: Null,   taRequired: String,   legalStatus: String,   sdfRemark: Null,   stageOfConstruction: Null,   clssEligiblePropFlag: Null,   totalUnit: Number {"typeId": "int"},   nhbClassification2011: String,   completionMonth: Null,   propName: String,   techStatus: String,   branchNumber: Number {"typeId": "int"},   propertyCategory: String,   remarks: String,   address: {|    addrType: Null,     addrBlock: Null,     addrTower: Null,     addrPlot: Null,     addrLine1: String,     addrLine2: String,     addrLine3: String,     addrLine4: String,     addrLine5: Null,     street: Null,     landmark: String,     location: String,     addrPhase: Null,     addrSector: Null,     city: String,     state: String,     addrPocket: Null,     areaCode: Number {"typeId": "int"},     addrSurvey: Null,     addrTenament: Null,     addrWard: Null,     pincode: Number {"typeId": "int"},     addrUnit: Null,     addrWing: Null,     addrTOBeAlloted: Null  |}|}> {"example": "[{\\\"builderNumber\\\":423704,\\\"projectNumber\\\":13389,\\\"buildingNumber\\\":null,\\\"aprRemark\\\":null,\\\"maxTotalCost\\\":null,\\\"maxAvgValue\\\":null,\\\"commencementDate\\\":null,\\\"propType\\\":\\\"F\\\",\\\"census_URB_Loc2011\\\":\\\"MUMBAI SUBURBAN\\\",\\\"phaseNumber\\\":13469,\\\"unitsPerFloor\\\":null,\\\"floorDetails\\\":\\\"G\\\",\\\"devAuthName\\\":null,\\\"paymentPlan\\\":null,\\\"propStatus\\\":\\\"C\\\",\\\"plotArea\\\":null,\\\"sdfFlag\\\":null,\\\"apprStatus\\\":\\\"Y\\\",\\\"planAuthCode\\\":\\\"MCORP\\\",\\\"floorNo\\\":36,\\\"maxExposure\\\":null,\\\"taRequired\\\":\\\"Y\\\",\\\"legalStatus\\\":\\\"P\\\",\\\"sdfRemark\\\":null,\\\"stageOfConstruction\\\":null,\\\"clssEligiblePropFlag\\\":null,\\\"totalUnit\\\":216,\\\"nhbClassification2011\\\":\\\"URB\\\",\\\"completionMonth\\\":null,\\\"propName\\\":\\\"RUNWAL GREENS-T-3 - C- ROSEWOOD\\\",\\\"techStatus\\\":\\\"Y\\\",\\\"branchNumber\\\":201,\\\"propertyCategory\\\":\\\"B\\\",\\\"remarks\\\":\\\"5% STRUCTURED DISBURSEMENT SCHEME (5:5:70:15:5) APPROVED. CONTACT NEHA UCHIL AT MULUND OFFICE. CC-22 FLRS PLAN=2B+S+3P+1ST TO 36 RESIDENTIAL FLOORS DTD06 APR 2015 SENT TO MFL 9326  &  29 OCT 2014 SENT TO MFL 9326CC UPTO 15TH TOP  WR PLANS DT 16.5.2014     OK TC 24.5.10  - 8 TOWERS  [PROP] 15 FLRS   T= 1600    RATE 6800-->\$APR_REMARK=REFER DISB PROCESS NOTE 30.9.11 UPLOADED. WK NOT STARTED-->\$WARNING_REMARK=SDS,PEMI SUBVENTION FROM 1ST  JANUARY 2015 TO 31ST DECEMBER  2016 CONTACT NEHA UCHIL FOR DETAILS CF FROM HDFC LTD - NOC MUST. DISB PROCESS NOTE 30.9.11 - UPLOADED-->SDS,PEMI SUBVENTION FROM 1ST  JANUARY 2015 TO 31ST DECEMBER  2016 CONTACT NEHA UCHIL FOR DETAILS \$\\\",\\\"address\\\":{\\\"addrType\\\":null,\\\"addrBlock\\\":null,\\\"addrTower\\\":null,\\\"addrPlot\\\":null,\\\"addrLine1\\\":\\\"S NO NEW CTS 681A\\/7-9,NEW CTS\\\",\\\"addrLine2\\\":\\\"681A\\/7-9,GOREGAON MUKUNDLINK\\\",\\\"addrLine3\\\":\\\"RD,VILLGWE NAHUR,MULUND [W]\\\",\\\"addrLine4\\\":\\\"MUMBAI\\\",\\\"addrLine5\\\":null,\\\"street\\\":null,\\\"landmark\\\":\\\"NR WOCKHARDT [FORTIS] HSPTL\\\",\\\"location\\\":\\\"BHANDUP_WEST\\\",\\\"addrPhase\\\":null,\\\"addrSector\\\":null,\\\"city\\\":\\\"MUMBAI\\\",\\\"state\\\":\\\"MS\\\",\\\"addrPocket\\\":null,\\\"areaCode\\\":400119,\\\"addrSurvey\\\":null,\\\"addrTenament\\\":null,\\\"addrWard\\\":null,\\\"pincode\\\":400078,\\\"addrUnit\\\":null,\\\"addrWing\\\":null,\\\"addrTOBeAlloted\\\":null}}]"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#344d3f43-4662-4246-ae45-6d3ca0f1997f">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="inputMetadata"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="outMetadata"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#4be8e36c-56ab-42f5-99bf-b316fb909ddb">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="buildingMasterInputMetadata"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="buidingMasterOutputMetadata"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#06de9f44-de83-4d92-8df1-21c45026a7dd">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="buildingSearchInputMetadata"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="buildingSearchOutputMetadata"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

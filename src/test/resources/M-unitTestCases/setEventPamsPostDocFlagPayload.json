@@ -1,0 +1,19 @@
+{
+    "parts": {
+       "unitId": {
+           "content": "1"
+       },
+       "statusFlag": {
+           "content": "Y"
+       },
+       "docFlag": {
+           "content": "Y"
+       },
+       "fileContent": {
+           "content": "pdfFileAttachment.pdf"
+       },
+       "filePassword": {
+           "content": "hdfc@1234"
+       }
+    }
+}

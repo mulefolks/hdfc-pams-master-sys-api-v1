@@ -1,0 +1,179 @@
+### QUERIES LIST  
+query:
+  buildingSearch: "SELECT pm.addr_building Building_No, NVL(pm.project_no, pm.project_uid) Project_No, pm.prop_name Prop_Name,pm.addr_wing Addr_Wing, pm.remark REMARKS, pm.br_no Branch_No, NULL ADDR_PLOT,NULL ADDR_UNIT,NULL ADDR_SURVEY,pm.addr_sector ADDR_SECTOR,pm.addr_pocket ADDR_POCKET,pm.addr_block ADDR_BLOCK,pm.addr_tenament ADDR_TENAMENT,pm.addr_type ADDR_TYPE, pm.addr_ward ADDR_WARD, pm.addr_phase ADDR_PHASE,pm.addr_tower ADDR_TOWER, NULL STREET,pm.prop_category PROP_CATEGORY,pm.builder_no BUILDER_NO, pm.prop_type PROP_TYPE,pm.addr_line1 ADDR_LINE1,pm.addr_line2 ADDR_LINE2,pm.addr_line3 ADDR_LINE3, pm.addr_line4 ADDR_LINE4,pm.addr_line5 ADDR_LINE5,pm.pin_code PIN_CODE,pm.prop_stat PROP_STAT,pm.completion_month COMPLETION_MONTH,pm.location LOCATION,pm.landmark LANDMARK,pm.area_code AREA_CODE,pm.appr_status APPR_STATUS,NULL PLOT_AREA,pm.apr_remark APR_REMARK,pm.ta_required TA_REQUIRED,pm.state STATE,pm.floor_det FLOOR_DET,pm.floor_no FLOOR_NO,pm.total_unit TOTAL_UNIT,pm.max_exposure MAX_EXPOSURE, pm.max_agr_value MAX_AGR_VALUE,pm.max_total_cost MAX_TOTAL_COST,pm.phase_no PHASE_NO,pm.city CITY,pm.dev_auth_name DEV_AUTH_NAME,pm.addr_to_be_alloted ADDR_TO_BE_ALLOTED,pm.units_per_floor UNITS_PER_FLOOR,pm.stage_of_construction STAGE_OF_CONSTRUCTION, pm.commencement_date COMMENCEMENT_DATE,pm.payment_plan PAYMENT_PLAN, pm.legal_status LEGAL_STATUS, pm.tech_status TECH_STATUS,pm.nhb_classification_2011 NHB_CLASSIFICATION_2011, pm.census_urb_loc_2011 CENSUS_URB_LOC_2011,pm.sdf_flag SDF_FLAG,pm.sdf_remark SDF_REMARK, pm.plan_auth_code PLAN_AUTH_CODE,pm.clss_eligible_prop_flag CLSS_ELIGIBLE_PROP_FLAG FROM ilps.property_mst pm  WHERE pm.prop_no = :prop_No"
+  docPathSp: "{call docimage.p_insert_image_transaction(:i_doc_scan_type,:i_doc_no,:i_doc_type,:i_doc_file_path_local,:i_doc_file_path_server,:i_doc_file_path_branch,:i_doc_scanned_at,:i_doc_key2_val,:i_doc_key3_val,:i_doc_key4_val,:i_doc_key5_val,:i_doc_key6_val,:i_doc_key7_val,:i_doc_key8_val,:i_doc_key9_val,:i_doc_sub_type,:i_appl_cust_no,:i_scan_elapsed_time,:i_doc_scanned_by,:i_img_origin,:i_doc_dms_refno,:i_storage_id,:i_lms_lead_no,:o_errmsg,:o_doc_rec_srno)}"
+  # queryOver
+  buildingMasterSearch: "SELECT NVL(pm.project_no, pm.project_uid) Project_No,
+       pm.prop_no Prop_No,
+       pm.prop_name Building_Name,
+       pm.addr_building Building_No,
+       pm.addr_wing Wing,
+       pm.appr_status Building_Status,
+       pm.builder_no,
+       pm.floor_no,
+       pm.floor_det,
+       pm.total_unit,
+       pac.pkg_pac_rnr.f_get_Rera_No_by_Prop(pm.prop_no) Rera_No,
+       ta.cons_status,
+       ta.mode_of_apr,
+       ta.date_of_apr,
+       ta.appraiser,
+       ta.ta_done_by SV_Done_By,
+       ta.stage_of_const,
+       ta.progress || ' ' || ta.remark Prop_Stat
+      FROM ilps.property_mst pm, ilps.th_tech_appraisal ta
+      WHERE NVL(pm.project_no, pm.project_uid) = :proj_No
+      AND pm.prop_no = ta.property_no
+      AND ta.record_status = 'C'"
+  # queryOver
+  exposure: "select (SELECT SUM(pm.total_unit) FROM ilps.property_mst pm WHERE pm.project_uid = t.project_id group by pm.project_uid) Total_Units,
+       (select bc.no_of_unit_sold from pac.pac_buss_cord_data bc where bc.project_no = t.project_id) Sold_Units,
+       nvl(count(t.file_no),0) Total_Loans,
+       nvl(sum(t.sanction_amt),0) Sanctioned_amount,
+       nvl(sum(t.disb_amt),0) Disbursed_amount,
+       t.project_id
+       from Ilps.Property_Exposure t
+       where t.project_id= :proj_id
+       group by t.project_id"
+  # queryOver
+  masterSearchProjNo: "select t.project_No,
+       t.project_name,
+       pac.f_Get_Pac_Proj_Address(t.project_No) Addr,
+       pac.pkg_pac_rnr.f_get_builder_by_project(t.project_no) Builder_No,
+       pac.pkg_pac_rnr.f_get_builder_name(pac.pkg_pac_rnr.f_get_builder_by_project(t.project_no)) Builder_Name,
+       pac.pkg_pac_rnr.f_get_project_Status(t.project_status) project_status,
+      (select cd.cd_desc from ilps.cd_master cd WHERE cd.cd_type ='APPR_STATUS' 
+       AND cd.cd_val =pac.pkg_pac_rnr.f_get_project_Status(t.project_status))project_status_desc,
+       t.city,
+       t.pincode,
+       t.state_code,
+       t.state,
+       pac.pkg_pac_rnr.f_get_Rera_No_by_Project(t.project_no) Rera_No
+       from pac.pac_project t
+       where t.project_no = :proj_No"
+  # queryOver
+  masterSearchReraNo: "select t.project_No,
+       t.project_name,
+       pac.f_Get_Pac_Proj_Address(t.project_No) Addr,
+       pac.pkg_pac_rnr.f_get_builder_by_project(t.project_no) Builder_No,
+       pac.pkg_pac_rnr.f_get_builder_name(pac.pkg_pac_rnr.f_get_builder_by_project(t.project_no)) Builder_Name,
+       pac.pkg_pac_rnr.f_get_project_Status(t.project_status) project_status,
+      (select cd.cd_desc from ilps.cd_master cd WHERE cd.cd_type ='APPR_STATUS' AND cd.cd_val =pac.pkg_pac_rnr.f_get_project_Status(t.project_status))project_status_desc,
+       t.city,
+       t.pincode,
+       t.state_code,
+       t.state
+       from pac.pac_project t
+       where t.project_no IN (SELECT DISTINCT (r.project_uid)
+                         FROM ilps.prop_mast_rera_certificate_det r
+                        WHERE r.rera_cert_no =:reraNumber
+                          AND rownum = 1 )"
+  # queryOver
+  masterSearchProjName: "Select t.Project_No,
+       t.Project_Name,
+       Pac.f_Get_Pac_Proj_Address(t.Project_No) Addr,
+       pac.pkg_pac_rnr.f_get_builder_by_project(t.project_no) Builder_No,
+       pac.pkg_pac_rnr.f_get_builder_name(pac.pkg_pac_rnr.f_get_builder_by_project(t.project_no)) Builder_Name,
+       pac.pkg_pac_rnr.f_get_project_Status(t.project_status) project_status,
+      (select cd.cd_desc from ilps.cd_master cd WHERE cd.cd_type ='APPR_STATUS' AND cd.cd_val =pac.pkg_pac_rnr.f_get_project_Status(t.project_status))project_status_desc,
+       t.city,
+       t.pincode,
+       t.state_code,
+       t.state,
+       pac.pkg_pac_rnr.f_get_Rera_No_by_Project(t.project_no) Rera_No
+       From Pac.Pac_Project t, ilps.district_city_master t1
+       Where t.state_code = t1.state
+       And t.City = T1.City_Code
+       And t.Project_Name Like '%' || '"
+  # queryOver
+  masterDetailSearch: "Select t.Project_No,
+       t.Project_Name,
+       Pac.f_Get_Pac_Proj_Address(t.Project_No) Addr_Line,
+       (Select Pm.Builder_No
+          From Sy_Property_Mst Pm
+         Where Pm.Project_No = t.Project_No
+           And Rownum = 1) Builder_No,
+       Pac.f_Get_Bldr_Dev_Name(t.Project_No) Builder_Name,
+       t.State,
+       t.City,
+       t.Pincode,
+       t.Branchofproject,
+       t.Property_Classification,
+       t.Area_Code,
+       Null Type,
+       t.Project_Status,
+       (select cd.cd_desc 
+          from ilps.cd_master cd
+         WHERE cd.cd_type ='APPR_STATUS' 
+           AND cd.cd_val = (select psm.cd_char1 from PAC.PAC_STATUS_MASTER psm where psm.statusid = t.Project_Status)) project_status_desc,
+       Null Sub_Status,
+       Null Sub_Status_Desc,
+       Null Proj_Approval_Dt,
+       Null First_Approval_Dt,
+       t.Location,
+       Null Census_Urb_Loc_2011,
+       Null Nhb_Classification_2011,
+       t.Receipt_Date Receipt_Dt,
+       Null Created_Source,
+       Null district,
+       Null Taluka,
+       Null Village,
+       t.Project_Survey_No,
+       t.Stage_Of_Construction,
+       t.Aquiring_Mode,
+       t.Origin_Place,
+       t.Servicecenter,
+       Null Clps_Coordinator,
+       t.Legal_Coordinator,
+       t.Technical_Coordinator,
+       t.Bd_Coordinator,
+       t.Ov_Coordinator,
+       t.Pac_Coordinator,
+       Null Approved_By,
+       Null Approved_On,
+       t.Addr_Survey_No,
+       t.Addr_Sector_No,
+       t.Street1,
+       t.Street2,
+       t.Street3,
+       t.Pocketno,
+       t.Blockno,
+       t.Typeno,
+       t.Sublocation,
+       t.Landmark,
+       t.Source_Name,
+       t.Source_Type,
+       t.State_Code,
+       t.Agency_Code,
+       t.Exec_Cd,
+       t.Proj_Cost,
+       t.No_Of_Building,
+       t.Launch_Date,
+       t.Master_Doc_Recd_Flag,
+       t.No_Of_Builders,
+       t.No_Of_Proposed_Unit,
+       t.Expected_Completion_Date,
+       t.Non_Ind_Funding_By_Hdfc,
+       t.Clps_No,
+       t.Approved_By_Oth_Inst,
+       t.Name_Of_The_Institution,
+       t.No_Of_Doc,
+       t.No_Of_Units,
+       t.Approved_By_Oth_Instution,
+       t.Developmentauthority,
+       t.Pmay_Flag,
+       t.created_on,
+       t.updated_on,
+       t.Tot_Appr_Unit,
+       t.Unit_Launched,
+       t.Exp_Business_Unit,
+       Null Stressed_Project
+      From Pac.Pac_Project t
+      where t.project_no = :inputValue"
+      # queryOver
+  nocFlag: "Update PAC.RNR_NOC_REQUEST t
+          set t.updated_by =:I_Updated_By,
+         t.updated_ON = sysdate,
+         t.NOC_STATUS_FLAG =:flagStatus
+         where t.unit_id =:I_Unit_Id"
+  

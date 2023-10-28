@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+	<sub-flow name="implementation-pams-dtl-srchSub_Flow" doc:id="e5b551e6-2aae-4c40-8d31-33d97668c360" >
+		<logger level="INFO" doc:name="ImplPAMSprojectDetailSearchSubFlowStartLogger" doc:id="4d692c89-9a7f-4abf-b9c0-c0deb9029982" message='"Info: Implementation PAMS Project Detail Search SubFlow Start" :: CorrelationId: #[vars.vTrackingHeader.correlationId]' />
+		<choice doc:name="Choice" doc:id="394b27b9-a2c7-474a-982b-a6445377fcb5" >
+			<when expression='#[not isEmpty(attributes.queryParams.projectNumber)]'>
+				<db:select doc:name="DB: pamsDetailSearchSelectQuery" doc:id="00b0d990-039e-45f9-b46c-b5b79c6a1b86" config-ref="Database_Config">
+			<db:sql><![CDATA[${query.masterDetailSearch}]]></db:sql>
+			<db:input-parameters><![CDATA[#["inputValue": attributes.queryParams.projectNumber]]]></db:input-parameters>
+		</db:select>
+				<json-logger:logger doc:name="pamsDetailsSearchDatabaseOutputLogger" doc:id="3222d6fc-1f32-4384-b911-5c79d93ee070" config-ref="JSON_Logger_Config" message='#["INFO: pamsDetailedSearchDatabaseOutput for CorrelationId ::" ++(vars.vTrackingHeader.correlationId as String default "")]'>
+					<json-logger:content ><![CDATA[#[output application/json
+---
+payload]]]></json-logger:content>
+				</json-logger:logger>
+				<ee:transform doc:name="DW: DetailSearchFinalOutput" doc:id="1a8f8189-243b-4075-83c6-251b929b5b50" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+%dw 2.0
+output application/json
+---
+
+	if (sizeOf(payload) > 0) ({"timestamp": (now()>>'IST') as String {format: "dd-MM-yyyy hh:mm:ss a"},"correlationId": vars.vTrackingHeader.correlationId, "appName": vars.vTrackingHeader.appName, "statusCode": 101,"ProjectDetails": payload}) else ({
+    "timestamp": (now()>>'IST') as String {format: "dd-MM-yyyy hh:mm:ss a"},
+    "correlationId": vars.vTrackingHeader.correlationId,
+    "appName": vars.vTrackingHeader.appName,
+    "statusCode": "102",
+    "statusMsg": "No Record Found."
+})
+	
+]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="DW: DetailSearchDefaultTransformer" doc:id="23b5c564-d9e2-429a-abac-f41aa47c60cb" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"timestamp": (now()>>'IST') as String {format: "dd-MM-yyyy hh:mm:ss a"},
+	"correlationId": vars.vTrackingHeader.correlationId,
+	"appName": vars.vTrackingHeader.appName,
+	"statusCode": "103",
+	"statusMsg": "Invalid Search Criteria, "++ "Please Enter Required Parameter ProjectNumber"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="ImplPAMSprojectDetailSearchSubFlowEndLogger" doc:id="2358504a-419e-49fc-aede-ea7ac59914bf" message='"Info: Implementation PAMS Project Detail Search SubFlow End" :: CorrelationId: #[vars.vTrackingHeader.correlationId]' />
+	</sub-flow>
+</mule>

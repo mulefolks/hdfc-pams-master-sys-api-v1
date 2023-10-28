@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+	<sub-flow name="implementation-pams-nocFlagUpdateSub_Flow" doc:id="27265e10-e7ee-404b-a759-605c124e32c3" >
+		<logger level="INFO" doc:name="ImplPAMSnocFlagUpdationsubFlowStart_Logger" doc:id="8380b1fe-562a-4586-b4d5-f403d7f045db" message='"Info: Implementation PAMS NocFlag Updation subFlow Start" :: CorrelationId: #[vars.vTrackingHeader.correlationId]' />
+		<try doc:name="Try" doc:id="b49383f7-c719-4135-a722-3745ffb724d4" transactionalAction="BEGIN_OR_JOIN">
+			<choice doc:name="Choice" doc:id="89f66c91-b354-4a9c-80d6-6c73c6188025">
+			<when expression="#[%dw 2.0&#10;output application/json&#10;---&#10;(! isEmpty(payload.parts.unitId.content as String default &quot;&quot;) and &#10;(upper(payload.parts.statusFlag.content) == 'Y' or upper(payload.parts.statusFlag.content) == 'N')  and &#10;upper(payload.parts.docFlag.content) == &quot;Y&quot;&#10;)]">
+				<ee:transform doc:name="DW: pdfToBase64Transformation" doc:id="d772df0c-7a9d-43f3-b1bb-b1e09a082458">
+					<ee:message>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="vBase64"><![CDATA[%dw 2.0
+import * from dw::core::Binaries
+output application/java
+---
+"fileContent": toBase64(write(payload.parts.fileContent.content) as Binary)
+
+]]></ee:set-variable>
+						<ee:set-variable variableName="vPayload"><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"filePassword": payload.parts.filePassword.content,
+	"statusFlag": payload.parts.statusFlag.content,
+	"unitId": payload.parts.unitId.content
+}]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<http:request method="POST" doc:name="req: HitachiApiCall" doc:id="032185b7-c862-4242-a384-87e9686344e9" config-ref="HTTP_Request_configuration" path="${req.https.path}" target="vStoragePath">
+					<http:body><![CDATA[#[output application/json
+---
+{
+	"LoanId": "1",
+	"Documents": [
+		{
+		"ApplicationCode": "1",
+		"FileContent": vars.vBase64.fileContent,
+		"FilePassword": vars.vPayload.filePassword,
+		"ReferenceNumber": vars.vPayload.unitId
+		
+	}
+	]
+}]]]></http:body>
+				</http:request>
+				<json-logger:logger doc:name="hitachiApiLogger" doc:id="77acda63-0e55-47a1-ac3f-13a92ca71a14" config-ref="JSON_Logger_Config" message='#["hitachi Api call for the correlationId :: " ++ (vars.vTrackingHeader.correlationId as String default "")]'>
+					<json-logger:content><![CDATA[#[output application/json
+---
+vars.vStoragePath]]]></json-logger:content>
+				</json-logger:logger>
+				<ee:transform doc:name="DW: storeProcedureInput" doc:id="5d635ebd-4abe-4bb6-aeca-e6183e00e248">
+					<ee:message>
+					</ee:message>
+					<ee:variables>
+						<ee:set-variable variableName="vStatusCode"><![CDATA[%dw 2.0
+output application/json
+---
+if(upper(typeOf(vars.vStoragePath)) == "STRING")(500)else if(! isEmpty(vars.vStoragePath.'errors' default ""))(
+if(vars.vStoragePath.'errors'[0].error_code== "HTTP_CONNECTIVITY_ERROR")(500)
+else if(vars.vStoragePath.'errors'[0].error_code=="HTTP_REQUEST_TIMEOUT_ERROR")(408)
+else if(vars.vStoragePath.'errors'[0].error_code=="HTTP_BAD_REQUEST_ERROR")(400)
+else if(vars.vStoragePath.'errors'[0].error_code=="DB_BAD_REQUEST_ERROR")(400)
+else if(vars.vStoragePath.'errors'[0].error_code=="HTTP_INTERNAL_SERVER_ERROR")(500)
+else if(vars.vStoragePath.'errors'[0].error_code=="HTTP_REQUEST_UNAUTHORIZED_ERROR")(401)
+else if(vars.vStoragePath.'errors'[0].error_code contains "APIKIT_BAD_REQUEST")(400)
+else if(vars.vStoragePath.errors[0].error_code contains "APIKIT_NOT_FOUND")(404)
+else if(vars.vStoragePath.errors[0].error_code contains "APIKIT_METHOD_NOT_ALLOWED")(405)
+else (500))else(200)]]></ee:set-variable>
+					</ee:variables>
+				</ee:transform>
+				<choice doc:name="Choice" doc:id="456e619d-295a-446b-a740-6d213ba0a6f4">
+					<when expression="#[! isEmpty(vars.vStoragePath)]">
+						<scatter-gather doc:name="Scatter-Gather" doc:id="19bbe3d7-a587-425d-8c3a-6c625ebc0422">
+					<route>
+						<flow-ref doc:name="FR: nocFlagUpdateSubFlow" doc:id="561e8931-9bc2-4149-af67-acc96e016633" name="implementation-pams-nocFlagUpdateSub_Flow1" />
+					</route>
+					<route>
+						<flow-ref doc:name="FR: docFlagUpdateSubFlow" doc:id="6eecc956-4f92-4488-b7fb-330852c34bd9" name="implementation-pams-nocFlagUpdateSub_Flow2" />
+					</route>
+				</scatter-gather>
+					</when>
+					<otherwise>
+						<set-payload value="#[%dw 2.0&#10;output application/json&#10;---&#10;{&#10;	&quot;timestamp&quot;: (now()&gt;&gt;'IST') as String {format: &quot;dd-MM-yyyy hh:mm:ss a&quot;},&#10;	&quot;correlationId&quot;: vars.vTrackingHeader.correlationId,&#10;	&quot;appName&quot;: vars.vTrackingHeader.appName,&#10;	&quot;statusCode&quot;: &quot;102&quot;,&#10;	&quot;statusMsg&quot;: &quot;Records Updation Failed in Hitachi server&quot;&#10;}]" doc:name="Set Payload" doc:id="d6c71f67-0a29-439a-b35e-070f4341e723" />
+					</otherwise>
+				</choice>
+			</when>
+			<when expression="#[%dw 2.0&#10;output application/json&#10;---&#10;(! isEmpty(payload.unitId as String default &quot;&quot;) and (upper(payload.statusFlag) == 'Y' or upper(payload.statusFlag) == 'N'))]">
+				<flow-ref doc:name="Flow Reference" doc:id="25521222-8c6c-4527-a4bb-5f210142d04f" name="implementation-pams-nocFlagUpdateSub_Flow1" />
+			</when>
+			<otherwise>
+				<ee:transform doc:name="DW: nocFlagUpdateDefaultTransformer" doc:id="c17ec591-b0ce-4835-9684-d1b9fe24c488">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"timestamp": (now()>>'IST') as String {format: "dd-MM-yyyy hh:mm:ss a"},
+	"correlationId": vars.vTrackingHeader.correlationId,
+	"appName": vars.vTrackingHeader.appName,
+	"statusCode": "103",
+	"statusMsg": "Invalid Input Data"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+		</try>
+		<logger level="INFO" doc:name="ImplPAMSNocFlagUpdationSubFlowEnd_Logger" doc:id="c49fe245-eb06-40a3-8699-184a8c5854c8" message='"Info: Implementation PAMS NocFlag Updation subFlow End" :: CorrelationId: #[vars.vTrackingHeader.correlationId]' />
+	</sub-flow>
+	<sub-flow name="implementation-pams-nocFlagUpdateSub_Flow1" doc:id="d6ac2bd7-a3c9-4c2b-8dfd-5e39c54961ae" >
+		<try doc:name="Try" doc:id="5e7db8e3-e3e4-4dd8-a4c7-2ee47c72e99c" transactionalAction="BEGIN_OR_JOIN">
+			<db:update doc:name="DB: nocFlagUpadateUpdateQuery" doc:id="3477559e-c490-454e-a8cc-785fb9629d08" config-ref="Database_Config">
+			<db:sql><![CDATA[${query.nocFlag}]]></db:sql>
+			<db:input-parameters><![CDATA[#[{
+	"I_Unit_Id": payload.unitId default "",
+	"I_Updated_By": payload.updateBy default "",
+	"flagStatus": payload.statusFlag default ""
+}]]]></db:input-parameters>
+		</db:update>
+			<json-logger:logger doc:name="nocFlagUpdateDatabaseOutputLogger" doc:id="d1da159f-10b4-4b37-94bc-fddae1cace24" config-ref="JSON_Logger_Config" message='#["INFO: pamsNocFlagUpdateDatabaseOutput for CorrelationId ::" ++(vars.vTrackingHeader.correlationId as String default "")]'>
+					<json-logger:content><![CDATA[#[output application/json
+---
+payload]]]></json-logger:content>
+				</json-logger:logger>
+			<ee:transform doc:name="DW: postNocFlagFinalOutput" doc:id="9c2677ac-61b6-4905-b612-ee63cfb5c744">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+if (payload.affectedRows > 0)(
+	{
+		"timestamp": (now()>>'IST') as String {format: "dd-MM-yyyy hh:mm:ss a"},
+		"correlationId": vars.vTrackingHeader.correlationId,
+		"appName": vars.vTrackingHeader.appName,
+		"statusCode": 101,
+"statusMsg": "Record(s) : " ++ payload.affectedRows as String default "" ++ " updated Successfully"
+    }
+) else 
+(
+	{
+"timestamp": (now()>>'IST') as String {format: "dd-MM-yyyy hh:mm:ss a"}, "correlationId": vars.vTrackingHeader.correlationId, "appName": vars.vTrackingHeader.appName, "statusCode": "102","statusMsg": "No Records Updated."})]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		</try>
+	</sub-flow>
+	<sub-flow name="implementation-pams-nocFlagUpdateSub_Flow2" doc:id="b1de779d-f930-4252-b0bc-678c4b716919" >
+		<try doc:name="Try" doc:id="19c14566-ee29-4294-83c3-8bd6a3af2c63" transactionalAction="BEGIN_OR_JOIN">
+			<db:stored-procedure doc:name="SP: docInsertDbCall" doc:id="69f3e2f9-711b-4a82-918b-10d082ca362f" config-ref="Database_Config">
+			<db:sql><![CDATA[${query.docPathSp}]]></db:sql>
+			<db:input-parameters><![CDATA[#[%dw 2.0
+output application/json
+---
+{
+"i_doc_scan_type": 'PROPERTY' as String default "",
+"i_doc_no": vars.vPayload.unitId default null,
+"i_doc_type": 'NOC_DOCUMENT' as String default "",
+"i_doc_file_path_local": payload.i_doc_file_path_local default null,
+"i_doc_file_path_server": vars.vStoragePath default null,
+"i_doc_file_path_branch": payload.i_doc_file_path_branch default null,
+"i_doc_scanned_at": payload.i_doc_scanned_at default null,
+"i_doc_key2_val": payload.i_doc_key2_val default null,
+"i_doc_key3_val": payload.i_doc_key3_val default null,
+"i_doc_key4_val": payload.i_doc_key4_val default null,
+"i_doc_key5_val": payload.i_doc_key5_val default null,
+"i_doc_key6_val": payload.i_doc_key6_val default null,
+"i_doc_key7_val": payload.i_doc_key7_val default null,
+"i_doc_key8_val": payload.i_doc_key8_val default null,
+"i_doc_key9_val": payload.i_doc_key9_val default null,
+"i_doc_sub_type": payload.i_doc_sub_type default null,
+"i_appl_cust_no": payload.i_appl_cust_no default null,
+"i_scan_elapsed_time": payload.i_scan_elapsed_time,
+"i_doc_scanned_by": payload.i_doc_scanned_by default null,
+"i_img_origin": payload.i_img_origin default null,
+"i_doc_dms_refno": payload.i_doc_dms_refno default null,
+"i_storage_id": payload.i_storage_id as String default null,
+"i_lms_lead_no": payload.i_lms_lead_no default null
+}]]]></db:input-parameters>
+			<db:output-parameters>
+				<db:output-parameter key="o_errmsg" type="VARCHAR" />
+				<db:output-parameter key="o_doc_rec_srno" type="FLOAT" />
+			</db:output-parameters>
+		</db:stored-procedure>
+			<json-logger:logger doc:name="docFlagUpdateDatabaseOutputLogger" doc:id="08c14cd8-8e79-4c82-b07e-ae35c776b8e4" config-ref="JSON_Logger_Config" message='#["INFO: pamsDocFlagUpdateDatabaseOutput for CorrelationId ::" ++(vars.vTrackingHeader.correlationId as String default "")]'>
+			<json-logger:content><![CDATA[#[output application/json
+---
+payload]]]></json-logger:content>
+		</json-logger:logger>
+			<ee:transform doc:name="DW: postDocFlagFinalOutput" doc:id="31194fcc-c9f4-4980-a56c-054e752d5554">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+if (! isEmpty(payload.o_doc_rec_srno))(
+	{
+		"timestamp": (now()>>'IST') as String {format: "dd-MM-yyyy hh:mm:ss a"},
+		"correlationId": vars.vTrackingHeader.correlationId,
+		"appName": vars.vTrackingHeader.appName,
+		"statusCode": 101,
+"statusMsg": "Record(s) : updated Successfully and the o_doc_rec_srno :- " ++ (payload.o_doc_rec_srno as String default "")
+    }
+) else 
+(
+	{
+"timestamp": (now()>>'IST') as String {format: "dd-MM-yyyy hh:mm:ss a"}, 
+"correlationId": vars.vTrackingHeader.correlationId, 
+"appName": vars.vTrackingHeader.appName, 
+"statusCode": "102",
+"statusMsg": "No Records Updated."})]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		</try>
+	</sub-flow>
+</mule>

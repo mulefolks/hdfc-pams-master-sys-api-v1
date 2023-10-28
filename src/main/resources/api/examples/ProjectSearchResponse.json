@@ -1,0 +1,24 @@
+{
+    "timestamp": "2022-10-03T10:58:21.117Z",
+    "correlationId": "gfkhgfjgfdgds",
+    "appName": "CLOS",
+    "statusCode": 101,
+    "projects": [
+        {
+            "projectNo": 41905,
+            "projectName": "DANGAT PARK 2",
+            "builderNo": 447160,
+            "builderName": "Dinkar S Dangat & Vikas S Dangat",
+            "projectStatus": "R",
+            "projectStatusDescription": "PROPERTY IS APPROVED",
+            "reraNumber": null,
+            "address": {
+                "addr": "Survey No.:8/1NDA RD,,DESHMUKHWADI, ,State : MAHARASHTRA,Pin Code:411023, Area Code :411060,Location :SHIVANESub location :PUNE,",
+                "city": "PUNE",
+                "stateCode": "MS",
+                "state": "MAHARASHTRA",
+                "pincode": "411023"
+            }
+        }
+    ]
+}

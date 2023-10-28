@@ -1,0 +1,113 @@
+#%RAML 1.0
+title: pams-master-sys-api
+description: This api will fetch the master details
+version: v1
+baseUri: http://localhost:8081/api/v1/getFetchdetails
+protocols:
+  - HTTP
+mediaType: 
+- application/json
+
+traits:
+  masterHeader: !include traits/header/HeadersTrait.raml
+
+  reqParamForProjSrc: !include traits/queryParameters/ProjectSearch_queryParams.raml
+  reqParamForProjDtlSrch: !include traits/queryParameters/ProjectDetailSearch_queryParams.raml
+  reqParamforBuildingMaster: !include traits/queryParameters/BuildingMaster_queryParams.raml
+  reqParamForBuildingSearch: !include traits/queryParameters/BuildingSearch_queryParams.raml
+  reqParamForExposure: !include traits/queryParameters/ExposurePams_queryParams.raml
+uses:
+  errorDataType: /resources/libraries/ErrorDataType.raml
+  projectSearchResponseDataType: resources/libraries/ProjectSearchResponseDataType.raml
+  projectDetailSearchResponseDataType: resources/libraries/ProjectDetailSearchResponseDataType.raml
+  nocFlagUpdateRequestDataType: resources/libraries/NocFlagUpdateRequestDataType.raml
+  nocFlagUpdateResponseDataType: resources/libraries/NocFlagUpdateResponseDataType.raml
+  buildingMasterResponseDataType: resources/libraries/BuildingMasterResponseDataType.raml
+  buildingSearchResponseDataType: resources/libraries/BuildingSearchResponseDataType.raml
+  exposureProjectDetailsResponseDataType: resources/libraries/ExposureProjectDetailsResponsesDataType.raml
+
+resourceTypes:
+  getCollection: !include  /resourceTypes/GetCollection.raml
+  postCollection: !include /resourceTypes/PostCollection.raml
+
+# types:
+#   outputMaster: !include dataType/masterOutputDataType.raml
+#   inputNocFlagUpdate: !include dataType/NocFlagUpdateInputDataType.raml
+
+/getPamsProjectSearch:
+  get:
+    is: [masterHeader, reqParamForProjSrc] 
+
+  type:
+    getCollection:
+      response-schema: projectSearchResponseDataType.output
+      response-example: !include examples/ProjectSearchResponse.json
+      errors-schema: errorDataType.error
+      
+/getPamsProjectDetailedFetch:
+  get:
+    is: [masterHeader, reqParamForProjDtlSrch]
+
+  type:
+    getCollection:
+      response-schema: projectDetailSearchResponseDataType.output
+      response-example: !include examples/ProjectDetailSearchResponse.json
+      errors-schema: errorDataType.error
+
+/postNocFlagUpdate:
+  post:
+    is: [masterHeader]
+
+  type:
+    postCollection:
+      request-schema: nocFlagUpdateRequestDataType.input
+      request-example: !include examples/NocFlagUpdateRequest.json
+      response-schema: nocFlagUpdateResponseDataType.output
+      response-example: !include examples/NocFlagUpdateResponse.json 
+      errors-schema: errorDataType.error
+
+/getbuildingMaster:
+  get:
+    is: [masterHeader, reqParamforBuildingMaster]
+    
+  type:
+    getCollection:
+      response-schema: buildingMasterResponseDataType.output
+      response-example: !include examples/BuildingMasterResponse.json
+      errors-schema: errorDataType.error
+
+/getBuildingSearch:
+  get:
+    is: [masterHeader, reqParamForBuildingSearch]
+
+  type:
+    getCollection:
+      response-schema: buildingSearchResponseDataType.output
+      response-example: !include examples/BuildingSearchResponse.json
+      errors-schema: errorDataType.error
+/getExposureMaster:
+  get:
+    is: [masterHeader, reqParamForExposure]
+    
+  type:
+    getCollection:
+      response-schema: exposureProjectDetailsResponseDataType.output
+      response-example: !include examples/ExposureProjectDetailsResponse.json
+      errors-schema: errorDataType.error
+/healthCheck:
+  get:
+    queryParameters:
+      health:
+        type: string
+        required: false           
+    responses:
+      200:
+        body:
+          application/json:
+            example:
+              {
+                "timestamp": (now()>>'IST')",
+                "Message": "success"
+              }
+
+  

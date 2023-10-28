@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+	<sub-flow name="implemntation-pams-building-masterSub_Flow" doc:id="e1d51d6c-21f6-45d8-a3ab-2c68b921e8e3" >
+		<logger level="INFO" doc:name="ImplPAMSbuildingMasterStartLogger" doc:id="86d92f19-458a-4f34-8f21-d85d29842d36" message='"Info: Implementation of PAMS Building Master Sub Flow Start" :: CorrelationId: #[vars.vTrackingHeader.correlationId]' />
+		<choice doc:name="Choice" doc:id="e7ded7a6-55e3-44ee-af2f-4090e4f13705" >
+			<when expression="(not isEmpty(attributes.queryParams.projectNumber))">
+				<db:select doc:name="DB: buildingMasterSelect Query" doc:id="8be73418-b304-464a-b8a2-d50d6f8869a2" config-ref="Database_Config">
+			<db:sql><![CDATA[${query.buildingMasterSearch}]]></db:sql>
+					<db:input-parameters ><![CDATA[#["proj_No": attributes.queryParams.projectNumber]]]></db:input-parameters>
+		</db:select>
+				<json-logger:logger doc:name="buidingMasterDatabaseOutputLogger" doc:id="c8f5d3d2-c306-4a67-bf2f-3c6490006de3" config-ref="JSON_Logger_Config" message='#["INFO: pamsBuildingMasterDatabaseOutput for CorrelationId ::" ++(vars.vTrackingHeader.correlationId as String default "")]'>
+					<json-logger:content ><![CDATA[#[output application/json
+---
+payload]]]></json-logger:content>
+				</json-logger:logger>
+				<ee:transform doc:name="DW: buildingMasterFInalOutput" doc:id="4be8e36c-56ab-42f5-99bf-b316fb909ddb" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+ var FINALPAYLOAD = payload map ( payload01 , indexOfPayload01 ) -> {
+	floorNo: payload01.FLOOR_NO,
+	buildingName: payload01.BUILDING_NAME,
+	buildingStatus: payload01.BUILDING_STATUS,
+	stageOfConstruction: payload01.STAGE_OF_CONST,
+	propStatus: payload01.PROP_STAT,
+	totalUnit: payload01.TOTAL_UNIT,
+	dateOfApr: payload01.DATE_OF_APR,
+	buildingNo: payload01.BUILDING_NO,
+	builderNo: payload01.BUILDER_NO,
+	reraNo: payload01.RERA_NO,
+	propNo: payload01.PROP_NO,
+	projectNo: payload01.PROJECT_NO,
+	floorDetail: payload01.FLOOR_DET,
+	constructionStatus: payload01.CONS_STATUS,
+	svDoneBy: payload01.SV_DONE_BY,
+	modeOfApr: payload01.MODE_OF_APR,
+	appraiser: payload01.APPRAISER,
+	wing: payload01.WING
+}
+---
+if (sizeOf(FINALPAYLOAD) > 0) ({"timestamp": (now()>>'IST') as String {format: "dd-MM-yyyy hh:mm:ss a"},"correlationId": vars.vTrackingHeader.correlationId, "appName": vars.vTrackingHeader.appName, "statusCode": 101,"BuildingDetails": FINALPAYLOAD}) else ({
+    "timestamp": (now()>>'IST') as String {format: "dd-MM-yyyy hh:mm:ss a"},
+    "correlationId": vars.vTrackingHeader.correlationId,
+    "appName": vars.vTrackingHeader.appName,
+    "statusCode": "102",
+    "statusMsg": "No Record Found."
+})
+	
+]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="DW: buildingMasterDefaultTransformer" doc:id="b7786308-9b5f-490b-a6a9-8406641558a1" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"timestamp": (now()>>'IST') as String {format: "dd-MM-yyyy hh:mm:ss a"},
+	"correlationId": vars.vTrackingHeader.correlationId,
+	"appName": vars.vTrackingHeader.appName,
+	"statusCode": "103",
+	"statusMsg": "Invalid Search Criteria"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="implPAMSbuildingMasterEndLogger" doc:id="abac744e-59bc-4e3d-aeb8-2e224382675c" message='"Info: Implementation of PAMS Building Master Sub Flow End" :: CorrelationId: #[vars.vTrackingHeader.correlationId]'/>
+	</sub-flow>
+</mule>

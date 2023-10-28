@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="implementation-pams-nocFlagUpdate-test-suite.xml" />
+	<munit:test name="implementation-pams-nocFlagUpdate-test-suite-implementation-pams-nocFlagUpdateSub_FlowTest" doc:id="819a5918-fdcf-45a4-9a25-a516ee1b02b8" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Event" doc:id="d3eed79b-84f5-4f7f-aab8-2a031cb884f1" >
+				<munit:payload value="#[readUrl('classpath://M-unitTestCases/setEventPamsPostNocFlagPayload.json')]" />
+			</munit:set-event>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="305ba9a3-4230-4287-a05a-247bb11d9a80" processor="db:update">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="DB: nocFlagUpadateUpdateQuery" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="3477559e-c490-454e-a8cc-785fb9629d08" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[readUrl('classpath://M-unitTestCases/mockWhenPamsPostNocDB.json')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to implementation-pams-nocFlagUpdateSub_Flow" doc:id="9f4c41de-34c5-4faf-9d19-c7c9db69a567" name="post:\postNocFlagUpdate:application\json:pams-master-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="197f9d3f-1f9c-405e-b6c6-41efef39bad8" expression="#[! isEmpty(payload)]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="implementation-pams-nocFlagUpdate-test-suite-implementation-pams-nocFlagUpdateDocFlagSub_FlowTest" doc:id="2e857f3d-923e-400e-9858-7af74b8217f2" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="SE: docNocPath" doc:id="60d59bf5-4c76-45c6-b15c-0c2fe1800b52" >
+				<munit:payload value="#[readUrl('classpath://M-unitTestCases/setEventPamsPostDocFlagPayload.json')]" />
+			</munit:set-event>
+			<munit-tools:mock-when doc:name="hitachiMockWhen" doc:id="1611efc2-89bc-4df8-91ab-050bd397256b" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="req: HitachiApiCall" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="032185b7-c862-4242-a384-87e9686344e9" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json&#10;---&#10;readUrl('classpath://M-unitTestCases/mockWhenPamsPostNocDocReq.json')]" />
+					<munit-tools:variables >
+						<munit-tools:variable key="vStoragePath" value="#[1]" mediaType="application/java" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="nocDbMockWhen" doc:id="d5037bb5-15b3-478f-b5c2-4d6606e60073" processor="db:update">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="DB: nocFlagUpadateUpdateQuery" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="3477559e-c490-454e-a8cc-785fb9629d08" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[readUrl('classpath://M-unitTestCases/mockWhenPamsPostNocDB.json')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="docSpDbMockWhen" doc:id="7d688322-eacf-4e17-8ba1-bf06c50d7526" processor="db:stored-procedure" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="SP: docInsertDbCall" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="69f3e2f9-711b-4a82-918b-10d082ca362f" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[readUrl('classpath://M-unitTestCases/mockWhenPamsPostNocDB.json')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to implementation-pams-nocFlagUpdateSub_Flow" doc:id="2564817d-b65d-4fb4-bc9f-cf8267e15066" name="post:\postNocFlagUpdate:multipart\form-data:pams-master-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="a95b9644-3000-4762-a528-6555e028e974" expression="#[! isEmpty(payload)]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="implementation-pams-nocFlagUpdate-test-suite-implementation-pams-nocFlagUpdateDocFlagDefaultSub_FlowTest" doc:id="6d9e179b-88c2-4346-90f9-ecc8b7dba641" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="SE: docNocPath" doc:id="5ca801ff-52aa-4f47-8ae4-80927661fd1e" >
+				<munit:payload value="#[readUrl('classpath://M-unitTestCases/setEventPamsPostDocFlagPayload.json')]" />
+			</munit:set-event>
+			<munit-tools:mock-when doc:name="hitachiMockWhen" doc:id="46c275b8-215f-4cb9-a312-22b9f2c24413" processor="http:request">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="req: HitachiApiCall" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="032185b7-c862-4242-a384-87e9686344e9" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json&#10;---&#10;readUrl('classpath://M-unitTestCases/mockWhenPamsPostNocDocReq.json')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="nocDbMockWhen" doc:id="b2a4fcf6-27c3-4ef5-89a6-cd8eb9a5582a" processor="db:update">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="DB: nocFlagUpadateUpdateQuery" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="3477559e-c490-454e-a8cc-785fb9629d08" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json&#10;---&#10;readUrl('classpath://M-unitTestCases/mockWhenPamsPostNocDB.json')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="docSpDbMockWhen" doc:id="12fcfd1b-13d6-4ffa-a746-01fb761886c4" processor="db:stored-procedure" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="SP: docInsertDbCall" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="69f3e2f9-711b-4a82-918b-10d082ca362f" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/json&#10;---&#10;readUrl('classpath://M-unitTestCases/mockWhenPamsPostNocDB.json')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to implementation-pams-nocFlagUpdateSub_Flow" doc:id="8b0e98f8-c134-4e84-be18-eb164fb48db5" name="post:\postNocFlagUpdate:application\json:pams-master-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="90f5b7b8-eedf-4e88-a4bd-8eebb9c406a9" expression="#[! isEmpty(payload)]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+	
+<munit:test name="implementation-pams-nocFlagUpdate-test-suite-implementation-pams-nocFlagUpdateSub_FlowTest-ChoiceDefault" doc:id="250e0d72-5537-413e-aa40-93ac071cc710" description="Test">
+		<munit:behavior>
+			<munit:set-event doc:name="Set Event" doc:id="28f314e4-f4ff-4be4-bca2-c924a398527b" >
+				<munit:payload value='#[{&#10;    "unitId": "",&#10;	"statusFlag": "Y"&#10;}]' />
+			</munit:set-event>
+
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to implementation-pams-nocFlagUpdateSub_Flow" doc:id="8341d8cb-eb78-4c35-a7e7-878b0749b8e5" name="implementation-pams-nocFlagUpdateSub_Flow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="e084af24-f83c-410e-bf4b-46ac0f83808b" expression="#[! isEmpty(payload)]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

@@ -1,0 +1,235 @@
+name: Continuous deployment
+
+
+on:
+  push:
+    branches:  
+      # - development
+      - uat
+      - release
+      - main      
+
+
+jobs:
+  # CD_development:
+  #   if: github.ref == 'refs/heads/development'
+  #   runs-on: [self-hosted, AWS, uat, Linux]
+  #   environment: development
+  #   permissions:
+  #     actions: read
+  #     checks: write
+  #     pull-requests: write
+  #     contents: read
+  #   env:
+  #     release_tag_name: "$( yq '.CICD.release-tag-prefix' ./.github/central-config.yml )-dev-alpha-$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
+  #     artifactName: "$( mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout )-dev-alpha-$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)-mule-application.jar" 
+
+  #   steps:
+  #     - name: Checkout ${{ github.head_ref }}
+  #       uses: actions/checkout@v3
+  #       with:
+  #         ref: ${{ github.head_ref }}
+  #     - name: Set up JDK 8
+  #       uses: actions/setup-java@v3
+  #       with:
+  #         java-version: '8'
+  #         distribution: 'temurin'
+            # overwrite-settings: false
+
+  #     - name: Display the environment variables
+  #       run: |
+  #         echo "The release and tag name is ${{ env.release_tag_name }} "
+  #         echo "The artfact name is ${{ env.artifactName }}"
+               
+  #     - name: Download dev artifacts
+  #       env:
+  #         GH_ENTERPRISE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         GH_HOST: "cldgit.hdfc.com"
+  #       run: |
+  #           gh release download --skip-existing "${{ env.release_tag_name }}" -p "${{ env.artifactName }}" -D "./target"
+
+  #     - name: Deploying the application
+  #       env:
+  #         USERNAME: ${{ secrets.MULESOFT_USERNAME }}
+  #         PASSWORD: ${{ secrets.MULESOFT_PASSWORD }}
+  #         KEY: ${{ secrets.MULE_KEY_DEV }}
+  #         GH_ENTERPRISE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #         GH_HOST: "cldgit.hdfc.com"
+      
+  #       run: |
+  #         artifactName=./target/${{ env.artifactName }}
+  #         mvn -U deploy -DmuleDeploy \
+  #         -Dmule.artifact="$artifactName" \
+  #         -Danypoint.environment="MuleSoft-DEV" \
+  #         -Danypoint.target="Cluster-UAT" \
+  #         -Danypoint.username="$USERNAME" \
+  #         -Danypoint.password="$PASSWORD" \
+  #         -Danypoint.key="$KEY" \
+  #         -Danypoint.env="dev" \
+  #         -DskipTests   
+
+  CD_uat:
+    if: github.ref == 'refs/heads/uat'
+    runs-on: [self-hosted, AWS, uat, Linux]
+    environment: uat
+    permissions:
+      actions: read
+      checks: write
+      pull-requests: write
+      contents: read
+    env:
+      release_tag_name: "$( yq '.CICD.release-tag-prefix' ./.github/central-config.yml )-uat-beta-$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
+      artifactName: "$( mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout )-uat-beta-$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)-mule-application.jar"    
+    steps:
+      - name: Checkout ${{ github.head_ref }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Set up JDK 8
+        uses: actions/setup-java@v3
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          overwrite-settings: false
+
+      - name: Display the environment variables
+        run: |
+          echo "The release and tag name is ${{ env.release_tag_name }} "
+          echo "The artfact name is ${{ env.artifactName }}"
+               
+      - name: Download uat artifacts
+        env:
+          GH_ENTERPRISE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_HOST: "cldgit.hdfc.com"
+        run: |
+            gh release download --skip-existing "${{ env.release_tag_name }}" -p "${{ env.artifactName }}" -D "./target"
+      - name: Deploying the application
+        env:
+          USERNAME: ${{ secrets.MULESOFT_USERNAME }}
+          PASSWORD: ${{ secrets.MULESOFT_PASSWORD }}
+          KEY: ${{ secrets.MULE_KEY_UAT }}
+          GH_ENTERPRISE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_HOST: "cldgit.hdfc.com"
+      
+        run: |
+          artifactName=./target/${{ env.artifactName }}
+          mvn -U deploy -DmuleDeploy \
+          -Dmule.artifact="$artifactName" \
+          -Danypoint.environment="MuleSoft-DEV" \
+          -Danypoint.target="Cluster-UAT" \
+          -Danypoint.username="$USERNAME" \
+          -Danypoint.password="$PASSWORD" \
+          -Danypoint.key="$KEY" \
+          -Danypoint.env="uat" \
+          -DskipTests 
+  CD_release:
+    if: github.ref == 'refs/heads/release'
+    runs-on: [self-hosted, AWS, uat, Linux]
+    permissions:
+      actions: read
+      checks: write
+      pull-requests: write
+      contents: read 
+    environment: Pre-prod
+    env:
+      release_tag_name: "$( yq '.CICD.release-tag-prefix' ./.github/central-config.yml )-preprod-rc-$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
+      artifactName: "$( mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout )-preprod-rc-$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)-mule-application.jar"         
+
+    steps:
+      - name: Checkout ${{ github.head_ref }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Set up JDK 8
+        uses: actions/setup-java@v3
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          overwrite-settings: false
+
+      - name: Display the environment variables
+        run: |
+          echo "The release and tag name is ${{ env.release_tag_name }} "
+          echo "The artfact name is ${{ env.artifactName }}"
+               
+      - name: Download preprod artifacts
+        env:
+          GH_ENTERPRISE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_HOST: "cldgit.hdfc.com"
+        run: |
+            gh release download --skip-existing "${{ env.release_tag_name }}" -p "${{ env.artifactName }}" -D "./target"
+      - name: Deploying the application
+        env:
+          USERNAME: ${{ secrets.MULESOFT_USERNAME }}
+          PASSWORD: ${{ secrets.MULESOFT_PASSWORD }}
+          KEY: ${{ secrets.MULE_KEY_PRE_PROD }}
+          GH_ENTERPRISE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_HOST: "cldgit.hdfc.com"
+      
+        run: |
+          artifactName=./target/${{ env.artifactName }}
+          mvn -U deploy -DmuleDeploy \
+          -Dmule.artifact="$artifactName" \
+          -Danypoint.environment="mulesoft-preprod" \
+          -Danypoint.target="mule-cluster-preprod" \
+          -Danypoint.username="$USERNAME" \
+          -Danypoint.password="$PASSWORD" \
+          -Danypoint.key="$KEY" \
+          -Danypoint.env="preprod" \
+          -DskipTests    
+       
+  CD_main:
+    if: github.ref == 'refs/heads/main'
+    runs-on: [self-hosted, AWS, prod, Linux]
+    permissions:
+      actions: read
+      checks: write
+      pull-requests: write
+      contents: read
+    environment: Prod
+    env:
+      release_tag_name: "$( yq '.CICD.release-tag-prefix' ./.github/central-config.yml )-prod-live-$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
+      artifactName: "$( mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout )-prod-live-$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)-mule-application.jar"
+
+    steps:
+      - name: Checkout ${{ github.head_ref }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+      - name: Set up JDK 8
+        uses: actions/setup-java@v3
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          overwrite-settings: false
+
+      - name: Display the environment variables
+        run: |
+          echo "The release and tag name is ${{ env.release_tag_name }} "
+          echo "The artfact name is ${{ env.artifactName }}"
+               
+      - name: Download preprod artifacts
+        env:
+          GH_ENTERPRISE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_HOST: "cldgit.hdfc.com"
+        run: |
+            gh release download --skip-existing "${{ env.release_tag_name }}" -p "${{ env.artifactName }}" -D "./target"
+      - name: Deploying the application
+        env:
+          USERNAME: ${{ secrets.MULESOFT_USERNAME }}
+          PASSWORD: ${{ secrets.MULESOFT_PASSWORD }}
+          KEY: ${{ secrets.MULE_KEY_PROD }}
+          GH_ENTERPRISE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_HOST: "cldgit.hdfc.com"
+      
+        run: |
+          artifactName=./target/${{ env.artifactName }}
+          mvn -U deploy -DmuleDeploy \
+          -Dmule.artifact="$artifactName" \
+          -Danypoint.environment="MuleSoft-PROD" \
+          -Danypoint.target="Cluster-PROD" \
+          -Danypoint.username="$USERNAME" \
+          -Danypoint.password="$PASSWORD" \
+          -Danypoint.key="$KEY" \
+          -Danypoint.env="prod" \
+          -DskipTests

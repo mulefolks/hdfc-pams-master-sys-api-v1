@@ -1,0 +1,70 @@
+#%RAML 1.0 Library
+types:
+  output:
+    type: object
+    properties:
+      correlationId:
+        description: Tracking parameter
+        type: string
+        required: false
+      timestamp:
+        description: timestamp
+        type: string | nil
+        required: false
+      appName:
+        type: string | nil
+        required: false
+      statusCode:
+        type: number | nil
+        required: false
+      projects:
+        type: array
+        items:
+          properties:
+            projectNo:
+              description: Project Number
+              type: number | nil
+              required: true
+            projectName:
+              description: Project Name
+              type: string | nil
+              required: true
+            builderNo:
+              description: Builder Number
+              type: number | nil
+              required: true
+            builderName:
+              description: Builder Name
+              type: string | nil
+              required: true
+            projectStatus:
+              description: Project Status
+              type: string | nil
+              required: true  
+            projectStatusDescription:
+              type: string | nil
+              required: false
+            reraNumber:
+              description: Rera Number
+              type: string | nil
+              required: true
+            address:
+              type: object
+              description: addresses
+              properties:
+                addr:
+                  description: Address
+                  type: string
+                  required: true
+                city:
+                  description: City
+                  type: string
+                  required: true
+                stateCode:
+                  description: State Code
+                  type: string
+                  required: true
+                state:
+                  description: State
+                  type: string
+                  required: true

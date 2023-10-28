@@ -1,0 +1,62 @@
+  
+api:
+  name: "pams-master-sys-api"
+  id: "18309929"
+json:
+  logger:
+    application:
+      name: "pams-master-sys-api"
+      version: "1.0.0"
+https:
+  host: "0.0.0.0"
+  basePath: "/pams/v1"
+  path: "/api/*"
+  port: "8082"
+  readTimeOut: "30000"
+  idleTimeOut: "40000"
+  tls:
+    path: "Wildcard_AWS_LZt_1.jks"
+    certType: "JKS"
+    pass: "![CG/7dT80HSDoVBJu4N/EYA==]"
+    alias: "hdfc"
+  reconnect:
+    frequency: "2000"
+    attempts: "2"
+    timeout: "3000" 
+       
+ora:
+  db:
+    host: "![EwZX2SkoHHhxmcf/zeFEXg==]"
+    port: "1521"
+    user: "![Qdb/j38JbOocNtq71rHr2A==]"
+    password: "![VR/GihX6wLqCyARqbCuA/g==]"
+    serviceName: "![0OwkP5e0szYtY2AcZD2KrA==]"
+    reconnect: 
+      frequency: "2000"
+      attempts: "2"
+    query:
+      timeout: "3000"
+    pool:
+      maxPoolSize: "10"
+      minPoolSize: "0"
+      acqIncrement: "1"
+      preStatCacheSize: "5"
+      maxWait: "7000"
+      maxIdletime: "0"
+      maxStatement: "0"
+# Requestor COnfiguraiton
+req:
+  https:
+    host: "0.0.0.0"
+    port: "8328"
+    basePath: "/api/v1/"
+    path: "/document"
+    responseTimeout: "40000"
+    responseBufferSize: "1024"
+    maxConnections: "-1"
+    connectionIdleTimeout: "30000"
+    reconnectionFrequency: "2000"
+    reconnectionAttempt: "2"
+    clientId: ""
+    clientSecret: ""
+    respValidator: "200..522"

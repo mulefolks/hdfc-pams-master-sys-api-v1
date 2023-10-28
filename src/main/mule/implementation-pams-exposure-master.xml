@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+	<sub-flow name="impl-expo-proj-detailsSub_Flow" doc:id="ecde06b5-0d53-4f32-9ee0-029c5fd8949c" >
+	<logger level="INFO" doc:name="ImpExpoProjSubflowStartLogger" doc:id="7027e3c8-7b09-4f4e-9e7c-14f32e7a02ca" message='"INFO: Implemntation Expo Project Details SubFlow Start" :: CorrelationId: #[vars.vTrackingHeader.correlationId]'/>
+		<choice doc:name="Choice" doc:id="e0015274-28b0-41be-b0e3-c2dc8b4b729f" >
+			<when expression="#[%dw 2.0&#10;output application/json&#10;---&#10;( not isEmpty(attributes.queryParams.projectId) )]">
+				<db:select doc:name="DB: pamsGetExpsoureSelectQuery" doc:id="3ffc89d8-c0d6-4b3d-8d13-c46aa7f61257" config-ref="Database_Config">
+					<db:sql ><![CDATA[${query.exposure}]]></db:sql>
+					<db:input-parameters ><![CDATA[#[{
+	"proj_id": attributes.queryParams.projectId
+}]]]></db:input-parameters>
+				</db:select>
+				<json-logger:logger doc:name="pamsExposureDatabaseOutputLogger" doc:id="7dad8541-0fdf-407e-80ca-52bdeeda7437" config-ref="JSON_Logger_Config" message='#["INFO: pamsExposureDatabaseOutput for CorrelationId ::" ++(vars.vTrackingHeader.correlationId as String default "")]'>
+					<json-logger:content ><![CDATA[#[output application/json
+---
+payload]]]></json-logger:content>
+				</json-logger:logger>
+				<ee:transform doc:name="DW: getExposureFinalPayload" doc:id="4254af75-80f6-4dbc-8334-949b43281536">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var VPayload =
+	payload map(payload01, index) ->{
+		projectId: payload01.PROJECT_ID, 
+		totalLoans: payload01.TOTAL_LOANS, 
+		totalUnits: payload01.TOTAL_UNITS,
+		soldUnits: payload01.SOLD_UNITS, 
+		disbursedAmount: payload01.DISBURSED_AMOUNT,
+		sanctionedAmount: payload01.SANCTIONED_AMOUNT
+	}	
+	
+---
+if(not isEmpty(payload.PROJECT_ID))({
+  "timestamp": (now()>>'IST') as String {format: "dd-MM-yyyy hh:mm:ss a"},	
+  "CorrelationId": vars.vTrackingHeader.correlationId,
+  "appName": vars.vTrackingHeader.appName,
+  "statusCode": 101,
+  "exposureProjectDetails": VPayload
+  }) else ({
+  "timestamp": (now()>>'IST') as String {format: "dd-MM-yyyy hh:mm:ss a"},
+  "CorrelationId": vars.vTrackingHeader.correlationId,
+  "appName": vars.vTrackingHeader.appName,  
+  "statusCode": 102,
+  "statusMsg": "No Records found to fetch with that input projectId" })
+]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			
+
+</when>
+			<otherwise >
+				<ee:transform doc:name="DW: getExposureDefaultTransformer" doc:id="095aca5c-72b2-436c-8eb1-4a8d08d15c71" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"timestamp": (now()>>'IST') as String {format: "dd-MM-yyyy hh:mm:ss a"},
+    "correlationId": vars.vTrackingHeader.correlationId,
+    "appName": vars.vTrackingHeader.appName,    
+    "statusCode": 103,
+    "errMsg": "Invalid search Criteria, "++ " Please Enter Required QueryParam projectId"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="ImpExpoProjSubflowEndLogger" doc:id="a18b8822-00bc-4563-9199-18a4288220c9" message='"INFO: Implemntation Expo Project Details SubFlow End " :: CorrelationId: #[vars.vTrackingHeader.correlationId]'/>
+	</sub-flow>
+</mule>

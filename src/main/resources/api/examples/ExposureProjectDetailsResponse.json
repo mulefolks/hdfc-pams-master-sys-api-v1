@@ -1,0 +1,16 @@
+{
+	"timestamp": "2022-07-23T16:09:44.255+05:30",
+  "correlationId": "xsdf12-dasj3-adj34-sadj56",
+  "appName": "PAMS",
+  "statusCode": 101,
+  "exposureProjectDetails": [
+	  {
+    "totalUnits": "373",
+    "soldUnits": "",
+    "totalLoans": "42",
+    "sanctionAmounts": "67103354",
+    "disbusedAmount": "34569052",
+    "projectId": "108363"
+    }
+		]
+}

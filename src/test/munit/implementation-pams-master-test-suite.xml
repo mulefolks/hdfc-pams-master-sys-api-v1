@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="implementation-pams-master-test-suite.xml" />
+	<munit:test name="implementation-pams-master-test-suite-implementation-pams-masterWithProjNumberSub_FlowTest" doc:id="c595e312-d688-4b7b-a5e0-44752d2a5d64" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Event" doc:id="529fce3f-1909-4682-bec6-052befea4fc5" >
+				<munit:attributes value="#[readUrl('classpath://M-unitTestCases/setEventPamsMasterSrch.json')]" />
+			</munit:set-event>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="450370e6-358d-440d-a07b-c8a822b78e58" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="DB: pamsProjectSearchWithProjNoSelect query" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="6f57c3c0-1d52-4a82-b7c6-e66d2bd797fd" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[readUrl('classpath://M-unitTestCases/mockWhenPamsMasterSrchDB.json')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to implementation-pams-masterSub_Flow" doc:id="53d04f9d-3145-424c-bdab-0f9a76b8a886" name="get:\getPamsProjectSearch:pams-master-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="8852030f-29fe-4596-9c9f-0c9dd8ddb210" expression="#[! isEmpty(payload)]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="implementation-pams-master-test-suite-implementation-pams-masterWithReraNumberSub_FlowTest" doc:id="598b2de9-513f-4817-8b51-21186ef0c030" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Event" doc:id="a202e8f7-4426-49b4-b12f-92b00ee08cc6" >
+				<munit:attributes value="#[readUrl('classpath://M-unitTestCases/setEventPamsMasterSrchReraNum.json')]" />
+			</munit:set-event>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="e2f2f3e0-d953-4e5e-b8a6-51322427dc7d" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="DB: pamsProjectSearchWithProjNoSelect query" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="6f57c3c0-1d52-4a82-b7c6-e66d2bd797fd" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[readUrl('classpath://M-unitTestCases/mockWhenPamsMasterSrchDB.json')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to implementation-pams-masterSub_Flow" doc:id="fe2b738b-2c6e-4dc7-a72f-b6c88c00a93f" name="get:\getPamsProjectSearch:pams-master-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="a59570bb-17bb-482e-9314-1378862b4913" expression="#[! isEmpty(payload)]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="implementation-pams-master-test-suite-implementation-pams-masterWithProjNameSub_FlowTest" doc:id="c2193a13-2752-4242-b15f-33cbde58ff8e" description="Test">
+		<munit:behavior >
+			<munit:set-event doc:name="Set Event" doc:id="ef82f186-748e-4c29-b28a-d9df24485e14" >
+				<munit:attributes value="#[readUrl('classpath://M-unitTestCases/setEventPamsMasterSrchProjName.json')]" />
+			</munit:set-event>
+			<munit-tools:mock-when doc:name="Mock when" doc:id="df1c25fa-696c-450d-94ab-c1a1b52e201a" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="DB: pamsProjectSearchWithProjNoSelect query" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="6f57c3c0-1d52-4a82-b7c6-e66d2bd797fd" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[readUrl('classpath://M-unitTestCases/mockWhenPamsMasterSrchDB.json')]" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to implementation-pams-masterSub_Flow" doc:id="0245b33e-0039-4381-bb2b-4ab68732d54d" name="get:\getPamsProjectSearch:pams-master-sys-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="b0334e51-14d4-4cce-b88e-d0ba1e0e9d6d" expression="#[! isEmpty(payload)]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+<munit:test name="implementation-pams-master-test-suite-implementation-pams-masterSub_FlowTest_ChoiceDefault" doc:id="59b16cf5-47c0-4146-b20c-dc8aa37292eb" description="Test">
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to implementation-pams-masterSub_Flow" doc:id="a73655aa-8f8d-4443-8145-09e18e19de27" name="implementation-pams-masterSub_Flow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that" doc:id="841409d1-621a-476b-9de1-39ff573a29d4" expression="#[! isEmpty(payload)]" is="#[MunitTools::notNullValue()]"/>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

@@ -1,0 +1,375 @@
+name: Continuous integration
+
+on: 
+  pull_request:
+    branches:
+      - development
+      - uat
+      - release
+      - main
+
+env:
+  APP_VERSION: $( mvn help:evaluate -Dexpression=project.version -q -DforceStdout )
+  APP_NAME: $( mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout )
+  SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+  SONAR_PROJECT_KEY: ${{ secrets.SONAR_PROJECT_KEY }}
+
+jobs:
+  CI_development:
+    if: ${{ github.base_ref == 'development' }}
+    runs-on: [self-hosted, AWS, uat, Linux]
+
+    env:
+      release_tag_name: "$( yq '.CICD.release-tag-prefix' ./.github/central-config.yml )-dev-alpha-$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
+      artifactName: "$( mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout )-dev-alpha-$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)-mule-application.jar"
+      KEY: ${{ secrets.MULE_KEY_DEV }}
+      DMULE_ENV: dev
+    steps:
+      - name: Checkout ${{ github.head_ref }} #1
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}         
+
+      - name: Set up JDK 8                     #2
+        uses: actions/setup-java@v3
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          overwrite-settings: false
+
+      - name: SonarQube Analysis on New Code.
+        run: mvn sonar:sonar -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }} -Dsonar.host.url=${{ env.SONAR_HOST_URL }} -Dsonar.login=${{ env.SONAR_TOKEN }} -Dsonar.sources=src        
+          
+      - name: SonarQube Analysis on Overall Code.
+        continue-on-error: true
+        run: mvn sonar:sonar -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }} -Dsonar.host.url=${{ env.SONAR_HOST_URL }} -Dsonar.login=${{ env.SONAR_TOKEN }} -Dsonar.sources=src -Dsonar.branch.name=${{ github.head_ref }} -Dsonar.qualitygate.wait=true
+            
+      - name: Check Quality Gates on overall code
+        id: QG_check
+        run: |
+              status=$(curl -u ${{ env.SONAR_TOKEN }}: '${{ env.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=${{ env.SONAR_PROJECT_KEY }}&branch=${{ github.head_ref }}')                    
+              echo "Quality Gates Status on overall code: $status"
+              
+              echo "PR Number: ${{ github.event.pull_request.number }}"
+              echo "Branch Name: ${{ github.head_ref }}"
+              
+              if echo "$status" | grep -q '"status":"ERROR"'; then
+                 echo "Quality Gate status on overall code: Failed!"
+                 QGstatus=$(echo "Quality Gate status on overall code: Failed!")
+             
+              elif echo "$status" | grep -q '"status":"WARN"'; then
+                 echo "Quality Gate status on overall code: Warnings!"
+                 QGstatus=$(echo "Quality Gate status on overall code: Warnings!")
+                
+              elif echo "$status" | grep -q '"status":"OK"'; then
+                echo "Quality Gate status on overall code: Passed!"
+                QGstatus=$(echo "Quality Gate status on overall code: Passed!")
+              else
+                echo "Unknown Quality Gate status on overall code"
+                QGstatus=$(echo "Unknown Quality Gate status on overall code")
+              fi
+              echo "::set-output name=QG_Status::$QGstatus"
+     
+      - name: Create comment with validation result
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `${{ steps.QG_check.outputs.QG_Status }} \n PR Number: ${{ github.event.pull_request.number }} \n Branch Name: ${{ github.head_ref }} \n Please refer below link for sonar analysis report on overall code:  ${{ env.SONAR_HOST_URL }}/dashboard?branch=${{ github.head_ref }}&id=${{ env.SONAR_PROJECT_KEY }}`
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
+
+      - name:  Build dev version of MuleSoft Application      #3
+        run: mvn -U -B package --file pom.xml -Dmule.key=${{ env.KEY }}  -Dmule.env=${{ env.DMULE_ENV }}
+
+      - name: Display the environment variables
+        run: |
+          echo "The application version is ${{ env.APP_VERSION }}"
+          echo "The Artifact ID fetched from pom.xml is ${{ env.APP_NAME }}"
+          echo "The release and tag name is ${{ env.release_tag_name }} "
+          echo "The artfact name is ${{ env.artifactName }}"
+          
+      # - name: Rename the jar file to dev version          #4
+      #   run: |
+      #     mv "./target/${{ env.APP_NAME }}-${{ env.APP_VERSION }}-mule-application.jar" "./target/${{ env.artifactName }}"
+
+      # - name: Upload Artifact into GitHub releases        #5
+      #   env:
+      #     GH_ENTERPRISE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     GH_HOST: "cldgit.hdfc.com"
+      #   run: |
+      #       gh release create "${{ env.release_tag_name }}" -t "${{ env.release_tag_name }}" "./target/${{ env.artifactName }}"
+  
+  CI_uat:
+    if: ${{ github.base_ref == 'uat' }}
+    runs-on: [self-hosted, AWS, uat, Linux]
+
+    env:
+      release_tag_name: "$( yq '.CICD.release-tag-prefix' ./.github/central-config.yml )-uat-beta-$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
+      artifactName: "$( mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout )-uat-beta-$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)-mule-application.jar"
+      KEY: ${{ secrets.MULE_KEY_UAT }}
+      DMULE_ENV: uat 
+
+    steps:
+      - name: Checkout ${{ github.head_ref }} #1
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}         
+
+      - name: Set up JDK 8                     #2
+        uses: actions/setup-java@v3
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          overwrite-settings: false
+
+      - name: SonarQube Analysis on New Code.
+        run: mvn sonar:sonar -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }} -Dsonar.host.url=${{ env.SONAR_HOST_URL }} -Dsonar.login=${{ env.SONAR_TOKEN }} -Dsonar.sources=src        
+          
+      - name: SonarQube Analysis on Overall Code.
+        continue-on-error: true
+        run: mvn sonar:sonar -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }} -Dsonar.host.url=${{ env.SONAR_HOST_URL }} -Dsonar.login=${{ env.SONAR_TOKEN }} -Dsonar.sources=src -Dsonar.branch.name=${{ github.head_ref }} -Dsonar.qualitygate.wait=true      
+
+      - name: Check Quality Gates on overall code
+        id: QG_check
+        run: |
+              status=$(curl -u ${{ env.SONAR_TOKEN }}: '${{ env.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=${{ env.SONAR_PROJECT_KEY }}&branch=${{ github.head_ref }}')                    
+              echo "Quality Gates Status on overall code: $status"
+              
+              echo "PR Number: ${{ github.event.pull_request.number }}"
+              echo "Branch Name: ${{ github.head_ref }}"
+              
+              if echo "$status" | grep -q '"status":"ERROR"'; then
+                 echo "Quality Gate status on overall code: Failed!"
+                 QGstatus=$(echo "Quality Gate status on overall code: Failed!")
+             
+              elif echo "$status" | grep -q '"status":"WARN"'; then
+                 echo "Quality Gate status on overall code: Warnings!"
+                 QGstatus=$(echo "Quality Gate status on overall code: Warnings!")
+                
+              elif echo "$status" | grep -q '"status":"OK"'; then
+                echo "Quality Gate status on overall code: Passed!"
+                QGstatus=$(echo "Quality Gate status on overall code: Passed!")
+              else
+                echo "Unknown Quality Gate status on overall code"
+                QGstatus=$(echo "Unknown Quality Gate status on overall code")
+              fi
+              echo "::set-output name=QG_Status::$QGstatus"
+     
+      - name: Create comment with validation result
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `${{ steps.QG_check.outputs.QG_Status }} \n PR Number: ${{ github.event.pull_request.number }} \n Branch Name: ${{ github.head_ref }} \n Please refer below link for sonar analysis report on overall code:  ${{ env.SONAR_HOST_URL }}/dashboard?branch=${{ github.head_ref }}&id=${{ env.SONAR_PROJECT_KEY }}`
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
+
+      - name: Build uat version of MuleSoft Application      #3
+        run: mvn -U -B package --file pom.xml -Dmule.key=${{ env.KEY }}  -Dmule.env=${{ env.DMULE_ENV }}
+
+      - name: Display the environment variables
+        run: |
+          echo "The application version is ${{ env.APP_VERSION }}"
+          echo "The Artifact ID fetched from pom.xml is ${{ env.APP_NAME }}"
+          echo "The release and tag name is ${{ env.release_tag_name }} "
+          echo "The artfact name is ${{ env.artifactName }}"
+          
+      - name: Rename the jar file to uat version          #4
+        run: |
+          mv "./target/${{ env.APP_NAME }}-${{ env.APP_VERSION }}-mule-application.jar" "./target/${{ env.artifactName }}"
+
+      - name: Upload Artifact into GitHub releases        #5
+        env:
+          GH_ENTERPRISE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_HOST: "cldgit.hdfc.com"
+        run: |
+            gh release create "${{ env.release_tag_name }}" -t "${{ env.release_tag_name }}" "./target/${{ env.artifactName }}"
+
+  CI_release:
+    if: ${{ github.base_ref == 'release' }}
+    runs-on: [self-hosted, AWS, uat, Linux]
+
+    env:
+      release_tag_name: "$( yq '.CICD.release-tag-prefix' ./.github/central-config.yml )-preprod-rc-$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
+      artifactName: "$( mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout )-preprod-rc-$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)-mule-application.jar"  
+      KEY: ${{ secrets.MULE_KEY_PRE_PROD }}
+      DMULE_ENV: preprod
+    steps:
+      - name: Checkout ${{ github.head_ref }} #1
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}         
+
+      - name: Set up JDK 8                     #2
+        uses: actions/setup-java@v3
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          overwrite-settings: false
+
+      - name: SonarQube Analysis on New Code.
+        run: mvn sonar:sonar -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }} -Dsonar.host.url=${{ env.SONAR_HOST_URL }} -Dsonar.login=${{ env.SONAR_TOKEN }} -Dsonar.sources=src        
+          
+      - name: SonarQube Analysis on Overall Code.
+        continue-on-error: true
+        run: mvn sonar:sonar -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }} -Dsonar.host.url=${{ env.SONAR_HOST_URL }} -Dsonar.login=${{ env.SONAR_TOKEN }} -Dsonar.sources=src -Dsonar.branch.name=${{ github.head_ref }} -Dsonar.qualitygate.wait=true      
+
+      - name: Check Quality Gates on overall code
+        id: QG_check
+        run: |
+              status=$(curl -u ${{ env.SONAR_TOKEN }}: '${{ env.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=${{ env.SONAR_PROJECT_KEY }}&branch=${{ github.head_ref }}')                    
+              echo "Quality Gates Status on overall code: $status"
+              
+              echo "PR Number: ${{ github.event.pull_request.number }}"
+              echo "Branch Name: ${{ github.head_ref }}"
+              
+              if echo "$status" | grep -q '"status":"ERROR"'; then
+                 echo "Quality Gate status on overall code: Failed!"
+                 QGstatus=$(echo "Quality Gate status on overall code: Failed!")
+             
+              elif echo "$status" | grep -q '"status":"WARN"'; then
+                 echo "Quality Gate status on overall code: Warnings!"
+                 QGstatus=$(echo "Quality Gate status on overall code: Warnings!")
+                
+              elif echo "$status" | grep -q '"status":"OK"'; then
+                echo "Quality Gate status on overall code: Passed!"
+                QGstatus=$(echo "Quality Gate status on overall code: Passed!")
+              else
+                echo "Unknown Quality Gate status on overall code"
+                QGstatus=$(echo "Unknown Quality Gate status on overall code")
+              fi
+              echo "::set-output name=QG_Status::$QGstatus"
+     
+      - name: Create comment with validation result
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `${{ steps.QG_check.outputs.QG_Status }} \n PR Number: ${{ github.event.pull_request.number }} \n Branch Name: ${{ github.head_ref }} \n Please refer below link for sonar analysis report on overall code:  ${{ env.SONAR_HOST_URL }}/dashboard?branch=${{ github.head_ref }}&id=${{ env.SONAR_PROJECT_KEY }}`
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
+
+      - name: Build preprod version of MuleSoft Application      #3
+        run: mvn -U -B package --file pom.xml -Dmule.key=${{ env.KEY }}  -Dmule.env=${{ env.DMULE_ENV }}
+
+      - name: Display the environment variables
+        run: |
+          echo "The application version is ${{ env.APP_VERSION }}"
+          echo "The Artifact ID fetched from pom.xml is ${{ env.APP_NAME }}"
+          echo "The release and tag name is ${{ env.release_tag_name }} "
+          echo "The artfact name is ${{ env.artifactName }}"
+          
+      - name: Rename the jar file to preprod version          #4
+        run: |
+          mv "./target/${{ env.APP_NAME }}-${{ env.APP_VERSION }}-mule-application.jar" "./target/${{ env.artifactName }}"
+
+      - name: Upload Artifact into GitHub releases        #5
+        env:
+          GH_ENTERPRISE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_HOST: "cldgit.hdfc.com"
+        run: |
+            gh release create "${{ env.release_tag_name }}" -t "${{ env.release_tag_name }}" "./target/${{ env.artifactName }}"
+
+  CI_main:
+    if: ${{ github.base_ref == 'main' }}
+    runs-on: [self-hosted, AWS, prod, Linux]
+
+    env:
+      release_tag_name: "$( yq '.CICD.release-tag-prefix' ./.github/central-config.yml )-prod-live-$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)"
+      artifactName: "$( mvn help:evaluate -Dexpression=project.artifactId -q -DforceStdout )-prod-live-$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)-mule-application.jar"
+      KEY: ${{ secrets.MULE_KEY_PROD }}
+      DMULE_ENV: prod
+    steps:
+      - name: Checkout ${{ github.head_ref }}
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.head_ref }}
+      - run: echo "$github.workspace"
+        
+      - name: Set up JDK 8
+        uses: actions/setup-java@v3
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          overwrite-settings: false
+
+      - name: SonarQube Analysis on New Code.
+        run: mvn sonar:sonar -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }} -Dsonar.host.url=${{ env.SONAR_HOST_URL }} -Dsonar.login=${{ env.SONAR_TOKEN }} -Dsonar.sources=src        
+          
+      - name: SonarQube Analysis on Overall Code.
+        continue-on-error: true
+        run: mvn sonar:sonar -Dsonar.projectKey=${{ env.SONAR_PROJECT_KEY }} -Dsonar.host.url=${{ env.SONAR_HOST_URL }} -Dsonar.login=${{ env.SONAR_TOKEN }} -Dsonar.sources=src -Dsonar.branch.name=${{ github.head_ref }} -Dsonar.qualitygate.wait=true
+        
+      - name: Check Quality Gates on overall code
+        id: QG_check
+        run: |
+              status=$(curl -u ${{ env.SONAR_TOKEN }}: '${{ env.SONAR_HOST_URL }}/api/qualitygates/project_status?projectKey=${{ env.SONAR_PROJECT_KEY }}&branch=${{ github.head_ref }}')                    
+              echo "Quality Gates Status on overall code: $status"
+              
+              echo "PR Number: ${{ github.event.pull_request.number }}"
+              echo "Branch Name: ${{ github.head_ref }}"
+              
+              if echo "$status" | grep -q '"status":"ERROR"'; then
+                 echo "Quality Gate status on overall code: Failed!"
+                 QGstatus=$(echo "Quality Gate status on overall code: Failed!")
+             
+              elif echo "$status" | grep -q '"status":"WARN"'; then
+                 echo "Quality Gate status on overall code: Warnings!"
+                 QGstatus=$(echo "Quality Gate status on overall code: Warnings!")
+                
+              elif echo "$status" | grep -q '"status":"OK"'; then
+                echo "Quality Gate status on overall code: Passed!"
+                QGstatus=$(echo "Quality Gate status on overall code: Passed!")
+              else
+                echo "Unknown Quality Gate status on overall code"
+                QGstatus=$(echo "Unknown Quality Gate status on overall code")
+              fi
+              echo "::set-output name=QG_Status::$QGstatus"
+     
+      - name: Create comment with validation result
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `${{ steps.QG_check.outputs.QG_Status }} \n PR Number: ${{ github.event.pull_request.number }} \n Branch Name: ${{ github.head_ref }} \n Please refer below link for sonar analysis report on overall code:  ${{ env.SONAR_HOST_URL }}/dashboard?branch=${{ github.head_ref }}&id=${{ env.SONAR_PROJECT_KEY }}`
+            github.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
+
+      - name: Build prod version of MuleSoft Application
+        run: mvn -U -B package --file pom.xml -Dmule.key=${{ env.KEY }}  -Dmule.env=${{ env.DMULE_ENV }}
+
+      - name: Display the environment variables
+        run: |
+          echo "The application version is ${{ env.APP_VERSION }}"
+          echo "The Artifact ID fetched from pom.xml is ${{ env.APP_NAME }}"
+          echo "The release and tag name is ${{ env.release_tag_name }} "
+          echo "The artfact name is ${{ env.artifactName }}"
+          
+      - name: Rename the jar file to prod version          #4
+        run: |
+          mv "./target/${{ env.APP_NAME }}-${{ env.APP_VERSION }}-mule-application.jar" "./target/${{ env.artifactName }}"
+
+      - name: Upload Artifact into GitHub releases        #5
+        env:
+          GH_ENTERPRISE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_HOST: "cldgit.hdfc.com"
+        run: |
+            gh release create "${{ env.release_tag_name }}" -t "${{ env.release_tag_name }}" "./target/${{ env.artifactName }}"          

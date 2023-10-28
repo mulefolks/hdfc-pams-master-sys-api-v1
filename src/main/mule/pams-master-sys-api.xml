@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:json="http://www.mulesoft.org/schema/mule/json" xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd  http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+    <flow name="pams-master-sys-api-main">
+        <http:listener path="${https.path}" config-ref="HTTP_Listener_config" doc:name="ListenerPamsMasterSys">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.vErrorMapping.httpStatus default 500]" reasonPhrase="#[vars.vErrorMapping.errorCode]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <set-variable value="#[output application/json&#xA;---&#xA;{&#xA; &quot;correlationId&quot;: attributes.headers.'correlationId',&#xA; &quot;appName&quot;: attributes.headers.'appName'&#xA;}]" doc:name="SV: tracking Header" doc:id="29fd3ebe-d776-4f45-95c6-4f382cd16117" variableName="vTrackingHeader" />
+        <apikit:router config-ref="pams-master-sys-api-config" doc:name="APIkitRouterPamsMasterSys" />
+        <error-handler ref="Error_Handler" />
+    </flow>
+    <flow name="get:\getBuildingSearch:pams-master-sys-api-config" doc:id="8e53ed63-72a2-4f26-93e3-832d610c0914">
+        <json-logger:logger doc:name="buildingSearchMainFlowStartLogger" doc:id="7ffa16a6-4d5b-45f6-8bf4-5c36ed49309f" config-ref="JSON_Logger_Config" message="#[&quot;INFO: Building search flow started for CorrelationId ::&quot; ++(attributes.headers.correlationId as String default &quot;&quot;)]">
+            <json-logger:content><![CDATA[#[{
+	"input Params": {
+		"headersParams": attributes.headers default "null",
+		"queryParams": attributes.queryParams default "null",
+		"BodyParams": payload default "null"
+	}
+}]]]></json-logger:content>
+        </json-logger:logger>
+        <flow-ref doc:name="FR: buildingSearchSubFlow" doc:id="75f6c17b-8a24-4adc-a1a4-ce72374408d2" name="implementation-pams-building-searchSub_Flow" />
+        <json-logger:logger doc:name="buildingSearchMainFlowEndLogger" doc:id="b4665ee2-69c4-428b-ab21-8fb7721121ae" config-ref="JSON_Logger_Config" message="#[&quot;INFO: Building search flow End for CorrelationId ::&quot; ++(vars.vTrackingHeader.correlationId as String default &quot;&quot;)]">
+            <json-logger:content><![CDATA[#[output application/json
+---
+payload]]]></json-logger:content>
+        </json-logger:logger>
+    </flow>
+    <flow name="get:\getPamsProjectDetailedFetch:pams-master-sys-api-config" doc:id="58a9115d-166d-4dfa-8348-ad51fbaf75ff">
+        <json-logger:logger doc:name="projectDetailedFetchMainFlowStartLogger" doc:id="d30a788d-1707-49f7-b8a9-7c5917887949" config-ref="JSON_Logger_Config" message="#[&quot;INFO: Pams project detailed Search flow started for CorrelationId ::&quot; ++(attributes.headers.correlationId as String default &quot;&quot;)]">
+            <json-logger:content><![CDATA[#[output application/json
+---
+{
+	"input Params": {
+		"headersParams": attributes.headers default "null",
+		"queryParams": attributes.queryParams default "null",
+		"BodyParams": payload default "null"
+	}
+}]]]></json-logger:content>
+        </json-logger:logger>
+        <flow-ref doc:name="FR: projectDetailsSearchSubFlow" doc:id="faa12e61-2e80-4d21-8231-5184f36b65d0" name="implementation-pams-dtl-srchSub_Flow" />
+        <json-logger:logger doc:name="ProjectDetailedMainFlowEndLogger" doc:id="3b048098-a2cf-4807-8e2b-547e3b4f9038" config-ref="JSON_Logger_Config" message="#[&quot;INFO: Pams project detailed Search flow End for CorrelationId ::&quot; ++(vars.vTrackingHeader.correlationId as String default &quot;&quot;)]">
+            <json-logger:content><![CDATA[#[output application/json
+---
+payload]]]></json-logger:content>
+        </json-logger:logger>
+    </flow>
+    <flow name="get:\getPamsProjectSearch:pams-master-sys-api-config" doc:id="f6143d63-dbcb-433e-9ce0-a6258bad9027">
+        <json-logger:logger doc:name="projectSearchMainFlowStartLogger" doc:id="682a2b36-1924-4c7c-ad0d-7046e46c8a6b" config-ref="JSON_Logger_Config" message="#[&quot;INFO: Pams project search flow started for CorrelationId ::&quot; ++(attributes.headers.correlationId as String default &quot;&quot;)]">
+            <json-logger:content><![CDATA[#[output application/json
+---
+{
+	"input Params": {
+		"headersParams": attributes.headers default "null",
+		"queryParams": attributes.queryParams default "null",
+		"BodyParams": payload default "null"
+	}
+}]]]></json-logger:content>
+        </json-logger:logger>
+        <flow-ref doc:name="FR: projectSearchSubFlow" doc:id="e686d68d-fc01-4928-aee8-ace2a71bcf30" name="implementation-pams-masterSub_Flow" />
+        <json-logger:logger doc:name="projectSearchMainFlowStartLogger" doc:id="bbf5832b-3861-4994-9af2-fe075940af82" config-ref="JSON_Logger_Config" message="#[&quot;INFO: Pams project search flow End for CorrelationId ::&quot; ++(vars.vTrackingHeader.correlationId as String default &quot;&quot;)]">
+            <json-logger:content><![CDATA[#[output application/json
+---
+payload]]]></json-logger:content>
+        </json-logger:logger>
+    </flow>
+    <flow name="get:\getbuildingMaster:pams-master-sys-api-config" doc:id="29a04ade-9980-4b21-89c3-c51e4ab43a32">
+        <json-logger:logger doc:name="buildingMasterMainFlowStartLogger" doc:id="6423f95a-a616-4844-bbab-da54d98df354" config-ref="JSON_Logger_Config" message="#[&quot; INFO: Building Master flow started for CorrelationId ::&quot; ++(attributes.headers.correlationId as String default &quot;&quot;)]">
+            <json-logger:content><![CDATA[#[output appliaction/json
+---
+{
+	"input Params": {
+		"headersParams": attributes.headers default "null",
+		"queryParams": attributes.queryParams default "null",
+		"BodyParams": payload default "null"
+	}
+}]]]></json-logger:content>
+        </json-logger:logger>
+        <flow-ref doc:name="FR: buildingMasterSubFlow" doc:id="d981a19c-41b0-4222-b9fd-eea74ba01e43" name="implemntation-pams-building-masterSub_Flow" />
+        <json-logger:logger doc:name="buildingMasterMainFlowEndLogger" doc:id="077a6342-81ba-4593-b259-07f040db9d4f" config-ref="JSON_Logger_Config" message="#[&quot; INFO: Building Master flow End for CorrelationId ::&quot; ++(vars.vTrackingHeader.correlationId as String default &quot;&quot;)]">
+            <json-logger:content><![CDATA[#[output application/json
+---
+payload]]]></json-logger:content>
+        </json-logger:logger>
+    </flow>
+    <flow name="post:\postNocFlagUpdate:application\json:pams-master-sys-api-config" doc:id="4db6e64d-c47a-48cb-aa09-96dd9bde959a">
+        <json-logger:logger doc:name="nocFlagUpdateMainFlowStartLogger" doc:id="9d5ef3ff-7cea-4014-9854-862da59e5794" config-ref="JSON_Logger_Config" message="#[&quot;INFO: NOC Flag Update flow started for CorrelationId ::&quot; ++(attributes.headers.correlationId as String default &quot;&quot;)]">
+            <json-logger:content><![CDATA[#[output application/json
+---
+{
+	"input Params": {
+		"headersParams": attributes.headers default "null",
+		"queryParams": attributes.queryParams default "null",
+		"BodyParams": payload default "null"
+	}
+}]]]></json-logger:content>
+        </json-logger:logger>
+        <flow-ref doc:name="FR: nocFlagUpdateSubFlow" doc:id="154cfbd4-f798-4cf5-a8cc-eef9bc664f5f" name="implementation-pams-nocFlagUpdateSub_Flow" />
+        <json-logger:logger doc:name="nocFlagUpdateMainFlowEndLogger" doc:id="5f73675a-e52e-44a4-9580-48ea2840d595" config-ref="JSON_Logger_Config" message="#[&quot;INFO: NOC Flag Update flow End for CorrelationId ::&quot; ++(vars.vTrackingHeader.correlationId as String default &quot;&quot;)]">
+            <json-logger:content><![CDATA[#[output application/json
+---
+payload]]]></json-logger:content>
+        </json-logger:logger>
+    </flow>
+    <flow name="get:\getExposureMaster:pams-master-sys-api-config" doc:id="22999220-0077-4152-956f-1e36e8e50663">
+        <json-logger:logger doc:name="exposureMasterMainFlowStartLogger" doc:id="9083d52a-aa6f-471c-a048-36bf8e54585d" config-ref="JSON_Logger_Config" message="#[&quot;INFO: Exposure Master Main flow started for CorrelationId ::&quot; ++(attributes.headers.correlationId as String default &quot;&quot;)]">
+            <json-logger:content><![CDATA[#[output application/json
+---
+{
+	"input Params": {
+		"headersParams": attributes.headers default "null",
+		"queryParams": attributes.queryParams default "null",
+		"BodyParams": payload default "null"
+	}
+}]]]></json-logger:content>
+        </json-logger:logger>
+        <flow-ref doc:name="FR: getExposureSubFlow" doc:id="3b89cc1b-4ef7-49ae-a1de-79ca453fcf8b" name="impl-expo-proj-detailsSub_Flow" />
+        <json-logger:logger doc:name="exposureMasterMainFlowEndLogger" doc:id="bd5ae99a-ea5b-4b47-be37-8b75b043864c" config-ref="JSON_Logger_Config" message="#[&quot;INFO: Exposure Master Main flow End for CorrelationId ::&quot; ++(vars.vTrackingHeader.correlationId as String default &quot;&quot;)]">
+            <json-logger:content><![CDATA[#[output application/json
+---
+payload]]]></json-logger:content>
+        </json-logger:logger>
+    </flow>
+    <flow name="get:\healthCheck:pams-master-sys-api-config">
+        <json-logger:logger doc:name="helathCheckMainFlowStartLogger" doc:id="8817a790-7925-4cfe-a597-7e4a63b77cd3" config-ref="JSON_Logger_Config" message="#[&quot;INFO: Health Check Main flow started for CorrelationId ::&quot; ++(attributes.headers.correlationId as String default &quot;&quot;)]">
+            <json-logger:content><![CDATA[#[output application/json
+---
+{
+	"input Params": {
+		"headersParams": attributes.headers default "null",
+		"queryParams": attributes.queryParams default "null",
+		"BodyParams": payload default "null"
+	}
+}]]]></json-logger:content>
+        </json-logger:logger>
+        <ee:transform doc:name="DW: healthCheckPayload">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  timestamp: (now()>>'IST') as String {format: "dd-MM-yyyy hh:mm:ss a"},
+  Message: "success"
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+        <json-logger:logger doc:name="helathCheckMainFlowEndLogger" doc:id="b11a602d-b9b6-45ae-a426-55161e5ce904" config-ref="JSON_Logger_Config" message="#[&quot;INFO: Health Check Main flow End for CorrelationId ::&quot; ++(vars.vTrackingHeader.correlationId as String default &quot;&quot;)]">
+            <json-logger:content><![CDATA[#[output application/json
+---
+payload]]]></json-logger:content>
+        </json-logger:logger>
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform doc:name="Transform Message">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="post:\postNocFlagUpdate:multipart\form-data:pams-master-sys-api-config" doc:id="b03e22c0-587a-4ee8-a067-550d89eb70e0">
+		<json-logger:logger doc:name="nocFlagUpdateMainFlowStartLogger" doc:id="82e0c439-07ed-4acb-a390-f91b9276b618" config-ref="JSON_Logger_Config" message='#["INFO: NOC Flag Update flow started for CorrelationId ::" ++(attributes.headers.correlationId as String default "")]' >
+			<json-logger:content ><![CDATA[#[output application/json
+---
+{
+	"input Params": {
+		"headersParams": attributes.headers default "null",
+		"queryParams": attributes.queryParams default "null",
+		"BodyParams": payload default "null"
+	}
+}]]]></json-logger:content>
+		</json-logger:logger>
+		<flow-ref doc:name="FR: nocFlagUpdateSubFlow" doc:id="6400da10-6894-4905-82e1-8113983c35e6" name="implementation-pams-nocFlagUpdateSub_Flow" />
+		<json-logger:logger doc:name="nocFlagUpdateMainFlowEndLogger" doc:id="80ae1fab-5ce0-4df9-b315-a5f511fdca86" config-ref="JSON_Logger_Config" message='#["INFO: NOC Flag Update flow End for CorrelationId ::" ++(vars.vTrackingHeader.correlationId as String default "")]' >
+			<json-logger:content ><![CDATA[#[output application/json
+---
+payload]]]></json-logger:content>
+		</json-logger:logger>
+    </flow>
+</mule>

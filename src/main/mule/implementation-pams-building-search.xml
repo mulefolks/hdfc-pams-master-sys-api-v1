@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+	<sub-flow name="implementation-pams-building-searchSub_Flow" doc:id="954ed8f7-6685-40ac-8edb-d520cf664778" >
+		<logger level="INFO" doc:name="implPAMSbuildingSearchSubFlowStartLogger" doc:id="8926e7be-efeb-4660-b05f-591640839388" message='"Info: Implementation of PAMS Building Search Sub Flow Start" :: CorrelationId: #[vars.vTrackingHeader.correlationId]' />
+		<choice doc:name="Choice" doc:id="266d725f-ee77-4f0a-942a-5066edd35dbc" >
+			<when expression='#[not isEmpty(attributes.queryParams.propertyNumber)]'>
+				<db:select doc:name="DB: pamsBuildingSearchSelect query" doc:id="bedb3ba2-170e-48ae-a7ad-8c023004ba76" config-ref="Database_Config" >
+					<db:sql ><![CDATA[${query.buildingSearch}]]></db:sql>
+					<db:input-parameters ><![CDATA[#["prop_No": attributes.queryParams.propertyNumber]]]></db:input-parameters>
+				</db:select>
+				<json-logger:logger doc:name="pamsBuildingSearchDatabaseOutputLogger" doc:id="259a41d3-0281-4ed1-b002-262a7459821e" config-ref="JSON_Logger_Config" message='#["INFO: pamsBuildingSearchDatabaseOutput for CorrelationId ::" ++(vars.vTrackingHeader.correlationId as String default "")]'>
+					<json-logger:content ><![CDATA[#[output application/json
+---
+payload]]]></json-logger:content>
+				</json-logger:logger>
+				<ee:transform doc:name="DW: buildingSearchFinalOutput" doc:id="06de9f44-de83-4d92-8df1-21c45026a7dd">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var FinalPaylaod = payload map ( payload01 , indexOfPayload01 ) -> {
+	projectNumber: payload01.PROJECT_NO,
+	builderNumber: payload01.BUILDER_NO,
+	buildingNumber: payload01.BUILDING_NO,
+	propName: payload01.PROP_NAME,
+	branchNumber: payload01.BRANCH_NO,
+	propType: payload01.PROP_TYPE,
+	propertyCategory: payload01.PROP_CATEGORY,
+	phaseNumber: payload01.PHASE_NO,
+	floorDetails: payload01.FLOOR_DET,
+	plotArea: payload01.PLOT_AREA,
+	unitsPerFloor: payload01.UNITS_PER_FLOOR,
+	floorNo: payload01.FLOOR_NO,
+	aprRemark: payload01.APR_REMARK,
+	maxTotalCost: payload01.MAX_TOTAL_COST,
+	maxAvgValue: payload01.MAX_AGR_VALUE,
+	commencementDate: payload01.COMMENCEMENT_DATE,
+	census_URB_Loc2011: payload01.CENSUS_URB_LOC_2011,
+	devAuthName: payload01.DEV_AUTH_NAME,
+	paymentPlan: payload01.PAYMENT_PLAN,
+	propStatus: payload01.PROP_STAT,
+	sdfFlag: payload01.SDF_FLAG,
+	apprStatus: payload01.APPR_STATUS,
+	planAuthCode: payload01.PLAN_AUTH_CODE,
+	maxExposure: payload01.MAX_EXPOSURE,
+	taRequired: payload01.TA_REQUIRED,
+	legalStatus: payload01.LEGAL_STATUS,
+	sdfRemark: payload01.SDF_REMARK,
+	stageOfConstruction: payload01.STAGE_OF_CONSTRUCTION,
+	clssEligiblePropFlag: payload01.CLSS_ELIGIBLE_PROP_FLAG,
+	totalUnit: payload01.TOTAL_UNIT,
+	nhbClassification2011: payload01.NHB_CLASSIFICATION_2011,
+	completionMonth: payload01.COMPLETION_MONTH,
+	techStatus: payload01.TECH_STATUS,
+	remarks: payload01.REMARKS,
+	address: {
+		addrType: payload01.ADDR_TYPE,
+		addrBlock: payload01.ADDR_BLOCK,
+		addrTower: payload01.ADDR_TOWER,
+		addrPlot: payload01.ADDR_PLOT,
+		addrLine1: payload01.ADDR_LINE1,
+		addrLine2: payload01.ADDR_LINE2,
+		addrLine3: payload01.ADDR_LINE3,
+		addrLine4: payload01.ADDR_LINE4,
+		addrLine5: payload01.ADDR_LINE5,
+		street: payload01.STREET,
+		landmark: payload01.LANDMARK,
+		location: payload01.LOCATION,
+		addrPhase: payload01.ADDR_PHASE,
+		addrSector: payload01.ADDR_SECTOR,
+		city: payload01.CITY,
+		state: payload01.STATE,
+		addrPocket: payload01.ADDR_POCKET,
+		areaCode: payload01.AREA_CODE,
+		addrSurvey: payload01.ADDR_SURVEY,
+		addrTenament: payload01.ADDR_TENAMENT,
+		addrWard: payload01.ADDR_WARD,
+		pincode: payload01.PIN_CODE,
+		addrUnit: payload01.ADDR_UNIT,
+		addrWing: payload01.ADDR_WING,
+		addrTOBeAlloted: payload01.ADDR_TO_BE_ALLOTED
+	}
+}
+---
+if (sizeOf(FinalPaylaod) > 0) ({"timestamp": (now()>>'IST') as String {format: "dd-MM-yyyy hh:mm:ss a"},"correlationId": vars.vTrackingHeader.correlationId,"appName": vars.vTrackingHeader.appName, "statusCode": 101,"BuildingDetails": FinalPaylaod}) else ({
+    "timestamp": (now()>>'IST') as String {format: "dd-MM-yyyy hh:mm:ss a"},
+    "correlationId": vars.vTrackingHeader.correlationId,
+    "appName": vars.vTrackingHeader.appName,
+    "statusCode": "102",
+    "statusMsg": "No Record Found."
+})
+]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="DW: buildingSearchDefaultTransformer" doc:id="e4d8c945-04c0-4fb6-bd97-2af2918847bf" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"correlationId": vars.vTrackingHeader.correlationId,
+	"timestamp": (now()>>'IST') as String {format: "dd-MM-yyyy hh:mm:ss a"},
+	"appName": vars.vTrackingHeader.appName,
+	"statusCode": "103",
+	"statusMsg": "Invalid Search Criteria, "++"Please Enter Required Parameter 'propertyNumber'"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="ImplPAMSbuildingSearchSubFlowEndLogger" doc:id="598537a6-d21e-490e-9183-5478c5688fb3" message='"Info: Implementation of PAMS Building Search Sub Flow End" :: CorrelationId: #[vars.vTrackingHeader.correlationId]'/>
+	</sub-flow>
+</mule>

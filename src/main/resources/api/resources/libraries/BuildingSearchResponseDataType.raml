@@ -1,0 +1,205 @@
+#%RAML 1.0 Library
+types:
+  output:
+    type: object
+    properties:
+      timestamp:
+        type: string
+        required: false
+      correlationId:
+        type: string
+        required: false
+      appName:
+        type: string
+        required: false
+      statusCode:
+        type: number
+        required: false
+      BuildingDetails:
+        type: array 
+        description: array of object
+        items:
+          properties:
+            projectNumber: 
+              type: number | nil
+              required: false
+            builderNumber:
+              type: number | nil
+              required: false 
+            buildingNumber:
+              type: number | nil
+              required: false 
+            propName:
+              type: string | nil
+              required: false 
+            branchNumber:
+              type: number | nil
+              required: false 
+            propType:
+              type: string | nil
+              required: false 
+            propertyCategory:
+              type: string | nil
+              required: false
+            phaseNumber:
+              type: number | nil
+              required: false 
+            floorDetails:
+              type: string | nil
+              required: false
+            plotArea:
+              type: string | nil
+              required: false
+            unitsPerFloor:
+              type: number | nil
+              required: false              
+            floorNo:
+              type: number | nil
+              required: false
+            aprRemark:
+              type: string | nil
+              required: false
+            maxTotalCost:
+              type: number | nil
+              required: false
+            maxAvgValue:
+              type: number | nil
+              required: false
+            commencementDate:
+              type: string | nil
+              required: false
+            census_URB_Loc2011:
+              type: string | nil
+              required: false
+            devAuthName:
+              type: string | nil
+              required: false
+            paymentPlan:
+              type: string | nil
+              required: false
+            propStatus:
+              type: string | nil
+              required: false
+            sdfFlag:
+              type: string | nil
+              required: false
+            apprStatus:
+              type: string | nil
+              required: false
+            planAuthCode:
+              type: string | nil
+              required: false
+            maxExposure:
+              type: string | nil
+              required: false
+            taRequired:
+              type: string | nil
+              required: false
+            legalStatus:
+              type: string | nil
+              required: false
+            sdfRemark:
+              type: string | nil
+              required: false
+            stageOfConstruction:
+              type: string | nil
+              required: false
+            clssEligiblePropFlag:
+              type: string | nil
+              required: false
+            totalUnit:
+              type: number | nil
+              required: false
+            nhbClassification2011:
+              type: string | nil
+              required: false
+            completionMonth:
+              type: string | nil
+              required: false
+            techStatus:
+              type: string | nil
+              required: false
+            remarks:
+              type: string | nil
+              required: false
+            address:
+              type: object
+              properties:
+                addrType:
+                  type: string | nil
+                  required: false 
+                addrBlock:
+                  type: string | nil
+                  required: false 
+                addrTower:
+                  type: string | nil
+                  required: false 
+                addrPlot:
+                  type: string | nil
+                  required: false 
+                addrLine1:
+                  type: string | nil
+                  required: false 
+                addrLine2:
+                  type: string | nil
+                  required: false 
+                addrLine3:
+                  type: string | nil
+                  required: false 
+                addrLine4: 
+                  type: string | nil
+                  required: false 
+                addrLine5:
+                  type: string | nil
+                  required: false 
+                street:
+                  type: string | nil
+                  required: false 
+                landmark:
+                  type: string | nil
+                  required: false 
+                location:
+                  type: string | nil
+                  required: false 
+                addrPhase:
+                  type: string | nil
+                  required: false 
+                addrSector:
+                  type: string | nil
+                  required: false 
+                city:
+                  type: string | nil
+                  required: false 
+                state:
+                  type: string | nil
+                  required: false 
+                addrPocket:
+                  type: string | nil
+                  required: false 
+                areaCode:
+                  type: number | nil
+                  required: false 
+                addrSurvey:
+                  type: string | nil
+                  required: false 
+                addrTenament:
+                  type: string | nil
+                  required: false 
+                addrWard:
+                  type: string | nil
+                  required: false 
+                pincode:
+                  type: number | nil
+                  required: false 
+                addrUnit:
+                  type: string | nil
+                  required: false 
+                addrWing:
+                  type: string | nil
+                  required: false 
+                addrTOBeAlloted:
+                  type: string | nil
+                  required: false 
+
+
+

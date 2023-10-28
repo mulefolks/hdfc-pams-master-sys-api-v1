@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+	<sub-flow name="implementation-pams-masterSub_Flow" doc:id="672de138-2852-4719-a77c-7ac6ecf66ad7" >
+		<logger level="INFO" doc:name="ImplPAMSmasterSubFlowStartLogger" doc:id="831a631b-445b-44a2-be9c-f06cd9f4f89a" message='"Info: Implementation PAMS Master subFlow Start" :: CorrelationId: #[vars.vTrackingHeader.correlationId]' />
+		<choice doc:name="Choice" doc:id="6b696a72-1e66-4529-a1f9-b4231de511cd" >
+			<when expression='#[(not isEmpty(attributes.queryParams.projectNumber)) and sizeOf(attributes.queryParams.projectNumber) &gt; 4 and sizeOf(attributes.queryParams.projectNumber) &lt; 15]'>
+				
+					<db:select doc:name="DB: pamsProjectSearchWithProjNoSelect query" doc:id="6f57c3c0-1d52-4a82-b7c6-e66d2bd797fd" config-ref="Database_Config" queryTimeout="${ora.db.query.timeout}" transactionalAction="NOT_SUPPORTED">
+			<reconnect frequency="${ora.db.reconnect.frequency}" count="${ora.db.reconnect.attempts}" />
+					<db:sql><![CDATA[${query.masterSearchProjNo}]]></db:sql>
+			<db:input-parameters><![CDATA[#[proj_No: attributes.queryParams.projectNumber]]]></db:input-parameters>
+		</db:select>
+					<json-logger:logger doc:name="pamsProjectSearchWithProjNoDatabaseOutputLogger" doc:id="51e03aa3-1986-47fb-b7bb-67f7f127e038" config-ref="JSON_Logger_Config" message='#["INFO: pamsMasterWithProjNoDatabaseOutput for CorrelationId ::" ++(vars.vTrackingHeader.correlationId as String default "")]'>
+					<json-logger:content ><![CDATA[#[output application/json
+---
+payload]]]></json-logger:content>
+				</json-logger:logger>
+				<ee:transform doc:id="7365f5b0-ecf6-46ff-831c-0f446c59e3a0" doc:name="DW: pamsProjectSearchwithProjNoFinalOutput">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+var FinalPayload = payload map ( payload01 , indexOfPayload01 ) -> {
+	projects: {
+		projectNo: payload01.PROJECT_NO,
+		projectName: payload01.PROJECT_NAME,
+		builderNo: payload01.BUILDER_NO,
+		builderName: payload01.BUILDER_NAME,
+		projectStatus: payload01.PROJECT_STATUS,
+		projectStatusDescription: payload01.PROJECT_STATUS_DESC,
+		reraNumber: payload01.RERA_NO,
+		
+		address: {
+			addr: payload01.ADDR,
+			city: payload01.CITY,
+			stateCode: payload01.STATE_CODE,
+			state: payload01.STATE,
+			pincode: payload01.PINCODE
+		}
+	}
+	
+}
+---
+
+	if (sizeOf(FinalPayload) > 0) ({"timestamp": (now()>>'IST') as String {format: "dd-MM-yyyy hh:mm:ss a"},"correlationId": vars.vTrackingHeader.correlationId, "appName": vars.vTrackingHeader.appName, "statusCode": 101,"projects": FinalPayload.projects}) else ({
+    "timestamp": (now()>>'IST') as String {format: "dd-MM-yyyy hh:mm:ss a"},
+    "correlationId": vars.vTrackingHeader.correlationId,
+    "appName": vars.vTrackingHeader.appName,
+    "statusCode": "102",
+    "statusMsg": "No Record Found."
+})
+	
+
+]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+			
+			</when>
+			<when expression='#[(not isEmpty(attributes.queryParams.reraNumber)) and sizeOf(attributes.queryParams.reraNumber) &gt; 4 and sizeOf(attributes.queryParams.reraNumber) &lt; 15]'>
+				<db:select doc:name="DB: pamsProjectSearchWithreraNoSelect query" doc:id="aaa39c2c-95c9-4dc7-9904-79a614ef0821" config-ref="Database_Config" transactionalAction="NOT_SUPPORTED" queryTimeout="${ora.db.query.timeout}">
+					<reconnect frequency="${ora.db.reconnect.frequency}" count="${ora.db.reconnect.attempts}"/>
+					<db:sql><![CDATA[${query.masterSearchReraNo}]]></db:sql>
+					<db:input-parameters><![CDATA[#[{
+'reraNumber': attributes.queryParams.reraNumber as String
+}]]]></db:input-parameters>
+				</db:select>
+				<json-logger:logger doc:name="pamsProjectSearchWithreraNoDatabaseOutputLogger" doc:id="8d3f4b34-a1be-4f70-9bea-9dc5ad98bf1c" config-ref="JSON_Logger_Config" message='#["INFO: pamsMasterWithReraNoDatabaseOutput for CorrelationId ::" ++(vars.vTrackingHeader.correlationId as String default "")]'>
+					<json-logger:content ><![CDATA[#[output application/json
+---
+payload]]]></json-logger:content>
+				</json-logger:logger>
+				<ee:transform doc:name="DW: pamsProjectSearchwithReraNoFinalOutput" doc:id="4a382122-727f-415f-8e08-8547685cd7e6" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var FinalPayload = payload map ( payload01 , indexOfPayload01 ) -> {
+	projects: {
+		projectNo: payload01.PROJECT_NO,
+		projectName: payload01.PROJECT_NAME,
+		builderNo: payload01.BUILDER_NO,
+		builderName: payload01.BUILDER_NAME,
+		projectStatus: payload01.PROJECT_STATUS,
+		projectStatusDescription: payload01.PROJECT_STATUS_DESC,
+		reraNumber: payload01.RERA_NO,
+		
+		address: {
+			addr: payload01.ADDR,
+			city: payload01.CITY,
+			stateCode: payload01.STATE_CODE,
+			state: payload01.STATE,
+			pincode: payload01.PINCODE
+		}
+	}
+	
+}
+---
+
+	if (sizeOf(FinalPayload) > 0) ({"timestamp": (now()>>'IST') as String {format: "dd-MM-yyyy hh:mm:ss a"},"correlationId": vars.vTrackingHeader.correlationId, "appName": vars.vTrackingHeader.appName, "statusCode": 101,"projects": FinalPayload.projects}) else ({
+    "timestamp": (now()>>'IST') as String {format: "dd-MM-yyyy hh:mm:ss a"},
+    "correlationId": vars.vTrackingHeader.correlationId,
+    "appName": vars.vTrackingHeader.appName,
+    "statusCode": "102",
+    "statusMsg": "No Record Found."
+})
+	
+
+]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<when expression='#[(not isEmpty(attributes.queryParams.projectName)) and ((not isEmpty(attributes.queryParams.city)) or (not isEmpty(attributes.queryParams.state)) or (not isEmpty(attributes.queryParams.district))or true)]'>
+				<set-variable value="#[&quot;Select t.Project_No,&#10;       t.Project_Name,&#10;       Pac.f_Get_Pac_Proj_Address(t.Project_No) Addr,&#10;       pac.pkg_pac_rnr.f_get_builder_by_project(t.project_no) Builder_No,&#10;       pac.pkg_pac_rnr.f_get_builder_name(pac.pkg_pac_rnr.f_get_builder_by_project(t.project_no)) Builder_Name,&#10;       pac.pkg_pac_rnr.f_get_project_Status(t.project_status) project_status,&#10;  (select cd.cd_desc from ilps.cd_master cd WHERE cd.cd_type ='APPR_STATUS' AND cd.cd_val =pac.pkg_pac_rnr.f_get_project_Status(t.project_status))project_status_desc,&#10;       t.city,&#10;       t.pincode,&#10;       t.state_code,&#10;       t.state,&#10;       pac.pkg_pac_rnr.f_get_Rera_No_by_Project(t.project_no) Rera_No&#10;  From Pac.Pac_Project t, ilps.district_city_master t1&#10;Where t.state_code = t1.state&#10;   And t.City = T1.City_Code&#10;   And t.Project_Name Like '%' || '&quot; ++ upper(attributes.queryParams.projectName) ++ &quot;' || '%'&quot; ++ (if(! isEmpty(attributes.queryParams.state))(&quot; And t.State_Code = NVL( '&quot; ++ upper(attributes.queryParams.state) ++ &quot;', t.State_Code)&quot;) else (&quot;&quot;)) ++ (if(! isEmpty(attributes.queryParams.city))(&quot; And t1.City_code = NVL( '&quot; ++ upper(attributes.queryParams.city) ++ &quot;', t1.City_code)&quot;) else (&quot;&quot;)) ++ (if(! isEmpty(attributes.queryParams.district))(&quot; AND t1.district_desc = NVL( '&quot; ++ upper(attributes.queryParams.district) ++ &quot;', t1.district_desc)&quot;) else (&quot;&quot;))]" doc:name="SV: QueryBuilderForProjSearchWithProjName" doc:id="0f42f1e9-3fe9-4c73-8de8-fcef48ca02c3" variableName="vQuery"/>
+				<db:select doc:name="DB: pamsProjectSearchWithProjNameSelect query" doc:id="5b0d06aa-2feb-4545-ade6-c1dfd7327a00" config-ref="Database_Config" queryTimeout="${ora.db.query.timeout}">
+					<reconnect frequency="${ora.db.reconnect.frequency}" count="${ora.db.reconnect.attempts}"/>
+					<db:sql ><![CDATA[#[(p('query.masterSearchProjName')) ++ upper(attributes.queryParams.projectName) ++ "' || '%'" ++ (if(! isEmpty(attributes.queryParams.state))(" And t.State_Code = NVL( '" ++ upper(attributes.queryParams.state) ++ "', t.State_Code)") else ("")) ++ (if(! isEmpty(attributes.queryParams.city))(" And t1.City_code = NVL( '" ++ upper(attributes.queryParams.city) ++ "', t1.City_code)") else ("")) ++ (if(! isEmpty(attributes.queryParams.district))(" AND t1.district_desc = NVL( '" ++ upper(attributes.queryParams.district) ++ "', t1.district_desc)") else (""))]]]></db:sql>
+				</db:select>
+				<json-logger:logger doc:name="pamsProjectSearchWithProjNoDatabaseOutputLogger" doc:id="59c2f828-65b7-45c6-8595-579c82bb7d7f" config-ref="JSON_Logger_Config" message='#["INFO: pamsMasterWithProjNameDatabaseOutput for CorrelationId ::" ++(vars.vTrackingHeader.correlationId as String default "")]'>
+					<json-logger:content ><![CDATA[#[output application/json
+---
+payload]]]></json-logger:content>
+				</json-logger:logger>
+				<ee:transform doc:name="DW: pamsProjectSearchwithProjNameFinalOutput" doc:id="51239392-eb8e-4e8d-a48c-5071af5e711a" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var FinalPayload = payload map ( payload01 , indexOfPayload01 ) -> {
+	projects: {
+		projectNo: payload01.PROJECT_NO,
+		projectName: payload01.PROJECT_NAME,
+		builderNo: payload01.BUILDER_NO,
+		builderName: payload01.BUILDER_NAME,
+		projectStatus: payload01.PROJECT_STATUS,
+		projectStatusDescription: payload01.PROJECT_STATUS_DESC,
+		reraNumber: payload01.RERA_NO,
+		
+		address: {
+			addr: payload01.ADDR,
+			city: payload01.CITY,
+			stateCode: payload01.STATE_CODE,
+			state: payload01.STATE,
+			pincode: payload01.PINCODE
+		}
+	}
+	
+}
+---
+
+	if (sizeOf(FinalPayload) > 0) ({"timestamp": (now()>>'IST') as String {format: "dd-MM-yyyy hh:mm:ss a"},"correlationId": vars.vTrackingHeader.correlationId, "appName": vars.vTrackingHeader.appName, "statusCode": 101,"projects": FinalPayload.projects}) else ({
+    "timestamp": (now()>>'IST') as String {format: "dd-MM-yyyy hh:mm:ss a"},
+    "correlationId": vars.vTrackingHeader.correlationId,
+    "appName": vars.vTrackingHeader.appName,
+    "statusCode": "102",
+    "statusMsg": "No Record Found."
+})
+	
+
+]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<ee:transform doc:name="DW: projectSearchDefaultTransformer" doc:id="b43ece10-64a6-404c-9859-23b72c497de1" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var data = {
+    "ProjectName": attributes.queryParams.projectName default "",
+    "City": attributes.queryParams.city default "",
+    "District": attributes.queryParams.district default "",
+    "State": attributes.queryParams.state default ""
+}
+var FinalPayload = if((! isEmpty(attributes.queryParams.projectName))
+		or (! isEmpty(attributes.queryParams.city)) 
+		or (! isEmpty(attributes.queryParams.state)) 
+		or (! isEmpty(attributes.queryParams.district)))("Please Enter " ++ ((data filterObject ((value, key, index) -> (value != null and value == "")) mapObject ((value, key, index) -> {
+    myData : (key as String)  
+})).*myData joinBy  " OR "))else if((isEmpty(attributes.queryParams.projectNo)))("Enter Project Number")else 
+	("statusMsg": "Invalid Search Criteria, " ++ "Please Enter any of these case" ++ "Case-1: projectNumber" ++"Case-2: reraNumber " ++"Case-3: projectName and state and district and city")
+---
+{
+	"timestamp": (now()>>'IST') as String {format: "dd-MM-yyyy hh:mm:ss a"},
+	"correlationId": vars.vTrackingHeader.correlationId,
+	"appName": vars.vTrackingHeader.appName,
+	"statusCode": "103",
+	"statusMsg": FinalPayload
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			
+</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="ImplPAMS-Master-subFlow-StartLogger" doc:id="01ec46b8-4a45-479b-a935-eb2c334ceb8c" message='"Info: Implementation PAMS Master subFlow End" :: CorrelationId: #[vars.vTrackingHeader.correlationId]' />
+	</sub-flow>
+</mule>

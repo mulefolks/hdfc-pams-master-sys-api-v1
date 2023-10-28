@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule
+	xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway"
+	xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:tls="http://www.mulesoft.org/schema/mule/tls"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation=" http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/tls http://www.mulesoft.org/schema/mule/tls/current/mule-tls.xsd http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+	<apikit:config name="pams-master-sys-api-config"
+		api="pams-master-sys-api.raml"
+		outboundHeadersMapName="outboundHeaders"
+		httpStatusVarName="httpStatus" />
+	<http:listener-config name="HTTP_Listener_config"
+		doc:name="HTTP Listener config"
+		doc:id="11163cef-0e82-46c4-92e8-4a89c2c5cc23"
+		basePath="${https.basePath}">
+		<http:listener-connection
+			host="${https.host}" port="${https.port}" protocol="HTTPS"
+			readTimeout="${https.readTimeOut}"
+			connectionIdleTimeout="${https.idleTimeOut}">
+			<reconnection>
+				<reconnect frequency="${https.reconnect.frequency}"
+					count="${https.reconnect.attempts}" />
+			</reconnection>
+			<tls:context>
+				<tls:key-store type="${https.tls.certType}"
+					keyPassword="${secure::https.tls.pass}"
+					password="${secure::https.tls.pass}" path="${https.tls.path}"
+					alias="${https.tls.alias}" />
+			</tls:context>
+		</http:listener-connection>
+	</http:listener-config>
+	<http:request-config
+		name="HTTP_Request_configuration"
+		doc:name="HTTP Request configuration"
+		doc:id="c6cfcdb7-f43e-4e6b-b300-ef18d6d8dcef"
+		basePath="${req.https.basePath}"
+		responseTimeout="${req.https.responseTimeout}">
+		<http:request-connection
+			host="${req.https.host}" port="${req.https.port}"
+			maxConnections="${req.https.maxConnections}"
+			connectionIdleTimeout="${req.https.connectionIdleTimeout}"
+			responseBufferSize="${req.https.responseBufferSize}">
+			<reconnection>
+				<reconnect frequency="${req.https.reconnectionFrequency}"
+					count="${req.https.reconnectionAttempt}" blocking="false" />
+			</reconnection>
+		</http:request-connection>
+		<http:default-headers>
+			<http:default-header key="client_id"
+				value="${secure::req.https.clientId}" />
+			<http:default-header key="client_secret"
+				value="${secure::req.https.clientSecret}" />
+			<http:default-header key="Content-Type" value="application/json" />
+		</http:default-headers>
+		<http:response-validator>
+			<http:success-status-code-validator
+				values="${req.https.respValidator}" />
+		</http:response-validator>
+	</http:request-config>
+	<db:config name="Database_Config" doc:name="Database Config"
+		doc:id="a04ddf63-0cc7-4337-a101-312581bf3b3f">
+		<db:oracle-connection
+			host="${secure::ora.db.host}" port="${ora.db.port}"
+			user="${secure::ora.db.user}" password="${secure::ora.db.password}"
+			serviceName="${secure::ora.db.serviceName}">
+			<db:pooling-profile
+				maxPoolSize="${ora.db.pool.maxPoolSize}"
+				minPoolSize="${ora.db.pool.minPoolSize}"
+				maxWait="${ora.db.pool.maxWait}" maxWaitUnit="MILLISECONDS"
+				acquireIncrement="${ora.db.pool.acqIncrement}"
+				preparedStatementCacheSize="${ora.db.pool.preStatCacheSize}"
+				maxIdleTime="${ora.db.pool.maxIdletime}"
+				maxStatements="${ora.db.pool.maxStatement}" />
+		</db:oracle-connection>
+	</db:config>
+	<secure-properties:config
+		name="Secure_Properties_Config" doc:name="Secure Properties Config"
+		doc:id="e5675660-9b08-4347-8aa8-6777be8ee82c"
+		file="properties\\${mule.env}-properties.yaml" key="${mule.key}" />
+	<configuration-properties
+		doc:name="Configuration properties"
+		doc:id="63db50d0-d5a4-4dbe-8284-212f03e06955"
+		file="properties\\${mule.env}-properties.yaml" />
+	<import doc:name="Import"
+		doc:id="0f6ada1d-d6d9-4705-88dd-3efc23b6a952" file="errorhandler.xml" />
+	<api-gateway:autodiscovery apiId="${api.id}"
+		ignoreBasePath="true" doc:name="API Autodiscovery"
+		doc:id="80760050-61b6-4a75-b138-22ea06e0c327"
+		flowRef="pams-master-sys-api-main" />
+	<configuration-properties
+		doc:name="Configuration properties"
+		doc:id="e00ea49f-a3c7-4d85-8afd-bb0ae1e94e04"
+		file="properties\common-properties.yaml" />
+	<json-logger:config name="JSON_Logger_Config"
+		doc:name="JSON Logger Config"
+		doc:id="b887bd2b-a34a-4f6e-8b29-df50fd9ff2c7"
+		environment="${mule.env}" />
+	<configuration doc:name="Configuration"
+		doc:id="34b58a3e-752f-4e49-9f2c-ccba9e10b1ba"
+		defaultErrorHandler-ref="Error_Handler" />
+</mule>

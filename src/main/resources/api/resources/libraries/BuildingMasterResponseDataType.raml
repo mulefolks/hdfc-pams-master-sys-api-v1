@@ -1,0 +1,94 @@
+#%RAML 1.0 Library
+types:
+  output:
+    type: object
+    properties:
+      timestamp:
+        type: string
+        required: false
+      correlationId:
+        type: string
+        required: false
+      appName:
+        type: string
+        required: false
+      statusCode:
+        type: number
+        required: false
+      BuildingDetails:
+        type: array 
+        description: array of object
+        items:
+          properties:
+            floorNo:
+              type: number | nil
+              description: floor No
+              required: false
+            buildingName:
+              type: string | nil
+              description: building Name
+              required: false
+            buildingStatus:
+              type: string | nil
+              description: buildingStatus
+              required: false
+            stageOfConstruction:
+              type: string | nil
+              description: stageOfConstruction
+              required: false
+            propStatus:
+              type: string | nil
+              description: propStatus
+              required: false
+            totalUnit:
+              type: number | nil
+              description: totalUnit
+              required: false
+            dateOfApr:
+              type: string | nil
+              description: dateOfApr
+              required: false
+            buildingNo:
+              type: string | nil
+              description: buildingNo
+              required: false
+            builderNo:
+              type: number | nil
+              description: builderNo
+              required: false
+            reraNo:
+              type: string | nil
+              description: reraNo
+              required: false
+            propNo:
+              type: string | nil
+              description: propNo
+              required: false
+            projectNo:
+              type: number | nil
+              description: projectNo
+              required: false
+            floorDetail:
+              type: string | nil
+              description: floorDetail
+              required: false
+            constructionStatus:
+              type: number | nil
+              description: constructionStatus
+              required: false
+            svDoneBy:
+              type: string | nil
+              description: svDoneBy
+              required: false
+            modeOfApr:
+              type: string | nil
+              description: modeOfApr
+              required: false
+            appraiser:
+              type: string | nil
+              description: appraiser
+              required: false
+            wing:
+              type: string | nil
+              description: wing
+              required: false

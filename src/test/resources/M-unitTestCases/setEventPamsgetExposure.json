@@ -1,0 +1,38 @@
+
+{
+  "headers": {
+    "correlationid": "asldfj-ljdsf43-jsdf334r",
+    "appname": "PAMS",
+    "client_secret": "C542Bb27a3a749BeBd2F460C6B7aF459",
+    "client_id": "ff85678ad41d4884ad4a2ae7d580eeb0",
+    "x-api-key": "sdfsaf",
+    "authorization": "Basic YWRqbGtmaGtzOmRzaGZranNma2hzZnNk",
+    "user-agent": "PostmanRuntime/7.30.0",
+    "accept": "*/*",
+    "cache-control": "no-cache",
+    "postman-token": "7f3f164c-7bcf-493b-978b-dd220a93b5d3",
+    "host": "localhost:8098",
+    "accept-encoding": "gzip, deflate, br",
+    "connection": "keep-alive"
+  },
+  "clientCertificate": null,
+  "method": "GET",
+  "scheme": "https",
+  "queryParams": {
+    "projectId": "45678"
+  },
+  "requestUri": "/pams/v1/api/getExposureMaster?projectId=45678",
+  "queryString": "projectId=45678",
+  "version": "HTTP/1.1",
+  "maskedRequestPath": "/getExposureMaster",
+  "listenerPath": "/pams/v1/api/*",
+  "localAddress": "/127.0.0.1:8098",
+  "relativePath": "/api/getExposureMaster",
+  "uriParams": {
+    
+  },
+  "rawRequestUri": "/pams/v1/api/getExposureMaster?projectId=45678",
+  "rawRequestPath": "/pams/v1/api/getExposureMaster",
+  "remoteAddress": "/127.0.0.1:56407",
+  "requestPath": "/pams/v1/api/getExposureMaster"
+}

@@ -1,0 +1,41 @@
+#%RAML 1.0 Library
+types:
+  output:
+    type: object
+    properties:
+      timestamp:
+        description: success Flag
+        type: string | nil
+        required: false
+      correlationId:
+        description: success Flag
+        type: string | nil
+        required: false
+      appName:
+        type: string | nil
+        required: false
+      statusCode:
+        type: number | nil
+        required: false
+      exposureProjectDetails:
+        type: array
+        items:
+          properties:
+            totalUnits:
+              type: string | nil
+              required: false
+            soldUnits:
+              type: string | nil
+              required: false
+            totalLoans:
+              type: string | nil
+              required: false
+            sanctionAmounts:
+              type: string | nil
+              required: false
+            disbusedAmounts:
+              type: string | nil
+              required: false
+            projectId:
+              type: string | nil
+              required: false
